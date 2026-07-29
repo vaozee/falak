@@ -229,7 +229,7 @@
     border:1px solid rgba(255,255,255,0.45);
     backdrop-filter:blur(10px) saturate(1.4); -webkit-backdrop-filter:blur(10px) saturate(1.4);
     box-shadow:0 8px 18px rgba(5,15,45,0.32), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -6px 14px rgba(255,255,255,0.08);
-    transition:left .38s cubic-bezier(.34,1.4,.4,1), width .38s cubic-bezier(.34,1.4,.4,1);
+    transition:left .38s cubic-bezier(.34,1.4,.4,1), width .38s cubic-bezier(.34,1.4,.4,1), top .38s cubic-bezier(.34,1.4,.4,1), height .38s cubic-bezier(.34,1.4,.4,1);
   }
   .ldock-btn{
     position:relative; z-index:2; flex:1; height:50px; border:none; background:transparent; cursor:pointer;
@@ -262,12 +262,54 @@
   .orbit-legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:11.5px; color:var(--text-faint);}
   .orbit-legend span{display:inline-flex; align-items:center; gap:5px;}
   .orbit-legend i{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .orbit-layout{display:flex; flex-direction:column; gap:14px;}
+  .orbit-stats-card .stat-grid{grid-template-columns:1fr 1fr;}
+  #orbitAutoRotate.active-toggle{background:var(--gold-grad); color:#2b1c05; border-color:transparent;}
   ::-webkit-scrollbar{width:0px; height:0px;}
   a{color:var(--teal2);}
   .app-footer{text-align:center; padding:20px 10px 10px; color:var(--text-faint); font-size:11.5px; line-height:1.7; max-width:100%; word-break:break-word;}
   .app-footer .af-line a{color:var(--text-faint); text-decoration:underline; text-decoration-color:var(--glass-border);}
   .spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(4,32,28,0.3);border-top-color:#04201c;animation:spin .7s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
+  /* ================= VERSI DESKTOP (>=900px) ================= */
+  @media (min-width:900px){
+    body{ display:flex; justify-content:center; }
+    .app{ max-width:1180px; padding-left:104px; }
+    header.top{ padding:28px 8px 16px; backdrop-filter:none; -webkit-backdrop-filter:none; background:transparent; position:relative; }
+    header.top h1{ font-size:26px; }
+    header.top .sub{ font-size:13.5px; }
+    .loc-chip{ padding:10px 16px; font-size:13px; }
+    main#mainEl{ padding-bottom:40px; }
+    h2.sect{ font-size:15px; margin-top:26px; }
+    .hero{ padding:30px 30px; }
+    .quick-grid{ grid-template-columns:repeat(4,1fr); gap:12px; }
+    .qbtn{ padding:16px 8px; }
+    .stat-grid{ grid-template-columns:repeat(4,1fr); }
+    .orbit-stats-card .stat-grid{ grid-template-columns:1fr; }
+    .card{ padding:20px; }
+    .app-footer{ text-align:left; padding:32px 8px 20px; }
+
+    /* dock -> sidebar kiri tetap (desktop) */
+    .dockspacer{ display:none; }
+    .ldock-outer{ left:0; right:auto; top:0; bottom:0; width:88px; padding-bottom:0; justify-content:flex-start; padding-top:28px; }
+    .ldock{ flex-direction:column; width:64px; height:auto; padding:10px 3px; border-radius:28px; margin:0 auto; gap:2px; }
+    .ldock-btn{ width:100%; height:56px; }
+    .ldock-btn.active{ transform:translateX(3px); }
+    .ldock-btn.active:active{ transform:translateX(3px) scale(0.94); }
+    .ldock-btn .lb{ font-size:8px; }
+
+    /* subnav "lainnya" jadi pil yang lebih lega, tidak perlu scroll horizontal sempit */
+    .subnav{ flex-wrap:wrap; overflow-x:visible; }
+
+    /* Orbit 3D: peraga besar berdampingan dengan panel statistik */
+    .orbit-layout{ flex-direction:row; align-items:flex-start; }
+    .orbit-layout .card:first-child{ flex:1 1 62%; min-width:0; }
+    .orbit-stats-card{ flex:0 0 300px; }
+    .orbit-wrap{ aspect-ratio:16/11; }
+  }
+  @media (min-width:1200px){
+    .app{ max-width:1320px; }
+  }
 </style>
 </head>
 <body>
@@ -517,6 +559,7 @@
 
       <!-- ---- Orbit 3D Real-time ---- -->
       <div class="subpage" id="sub-orbit">
+        <div class="orbit-layout">
         <div class="card" style="padding:12px;">
           <div class="orbit-wrap" id="orbitWrap">
             <div class="orbit-loading" id="orbitLoading">Memuat visualisasi 3D…</div>
@@ -536,14 +579,16 @@
             </select>
             <button class="btn ghost sm" id="orbitNowBtn">⏱️ Sekarang</button>
             <button class="btn ghost sm" id="orbitResetView">🎯 Reset Tampilan</button>
+            <button class="btn ghost sm" id="orbitAutoRotate">🔄 Putar Otomatis</button>
           </div>
           <div class="orbit-legend">
             <span><i style="background:#f5c542;"></i>Matahari</span>
             <span><i style="background:#3fa7e8;"></i>Bumi</span>
             <span><i style="background:#c9c9c9;"></i>Bulan</span>
+            <span><i style="background:#6fd6ff;"></i>Jejak orbit</span>
           </div>
         </div>
-        <div class="card">
+        <div class="card orbit-stats-card">
           <div class="stat-grid">
             <div class="stat"><div class="l">Tanggal &amp; Waktu Simulasi</div><div class="n" id="orbitDateTime" style="font-size:12.5px;">—</div></div>
             <div class="stat"><div class="l">Fase Bulan</div><div class="n teal" id="orbitPhaseName" style="font-size:12.5px;">—</div></div>
@@ -553,7 +598,8 @@
             <div class="stat"><div class="l">Kemiringan Sumbu Bumi</div><div class="n" style="font-size:12.5px;">23.44°</div></div>
           </div>
         </div>
-        <div class="note">Arah &amp; fase Bulan/Bumi dihitung real-time dari algoritma Jean Meeus yang sama dengan perhitungan lain di aplikasi ini — akurat secara astronomis. Jarak &amp; ukuran benda langit divisualisasikan dengan skala yang disederhanakan (bukan skala asli) agar mudah dilihat. Seret untuk memutar tampilan, cubit/scroll untuk zoom, seret dua jari untuk geser.</div>
+        </div>
+        <div class="note">Arah &amp; fase Bulan/Bumi dihitung real-time dari algoritma Jean Meeus yang sama dengan perhitungan lain di aplikasi ini — akurat secara astronomis. Jarak &amp; ukuran benda langit divisualisasikan dengan skala yang disederhanakan (bukan skala asli) agar mudah dilihat. Efek visual (atmosfer, korona, bayangan gerhana, jejak orbit) bersifat dekoratif untuk memperjelas peraga. Seret untuk memutar tampilan, cubit/scroll untuk zoom, seret dua jari untuk geser.</div>
       </div>
     </section>
 
@@ -1109,8 +1155,18 @@ const bubble = document.getElementById('bubble');
 function moveBubble(btn){
   const dock = document.getElementById('dock');
   const dr = dock.getBoundingClientRect(), br = btn.getBoundingClientRect();
-  bubble.style.left = (br.left - dr.left) + 'px';
-  bubble.style.width = br.width + 'px';
+  const vertical = getComputedStyle(dock).flexDirection === 'column';
+  if(vertical){
+    bubble.style.top = (br.top - dr.top) + 'px';
+    bubble.style.height = br.height + 'px';
+    bubble.style.left = '4px';
+    bubble.style.width = 'calc(100% - 8px)';
+  } else {
+    bubble.style.left = (br.left - dr.left) + 'px';
+    bubble.style.width = br.width + 'px';
+    bubble.style.top = '-8px';
+    bubble.style.height = '66px';
+  }
 }
 const HEADER_META = {
   'page-home': ['Hisab Falakiyah','Kalkulator astronomi Islam offline'],
@@ -1455,13 +1511,14 @@ document.getElementById('grBtn').addEventListener('click', ()=>{
 /* ================= ORBIT 3D (Matahari–Bumi–Bulan real-time) ================= */
 const ORBIT_AU_UNITS = 38;        // 1 AU -> unit jarak orbit Bumi (skala disederhanakan)
 const ORBIT_SUN_R = 4.5;
-const ORBIT_EARTH_R = 1.5;
-const ORBIT_MOON_R = 0.45;
+const ORBIT_EARTH_R = 1.6;
+const ORBIT_MOON_R = 0.46;
 const ORBIT_MOON_DIST_BASE = 384400; // km, jarak rata-rata Bumi-Bulan
-const ORBIT_MOON_DIST_SCALE = 7.5;   // unit jarak orbit Bulan pada jarak rata-rata
+const ORBIT_MOON_DIST_SCALE = 8.5;   // unit jarak orbit Bulan pada jarak rata-rata
 const ORBIT_EARTH_TILT = 23.44;
+const ORBIT_TRAIL_LEN = 260;
 
-const orbitState = { playing:true, speedMult:3600, simTime:new Date(), animId:null, lastTs:null, threeLoading:false };
+const orbitState = { playing:true, speedMult:3600, simTime:new Date(), animId:null, lastTs:null, threeLoading:false, labels:true, autoRotate:false };
 let _orbitScriptsAdded = false;
 
 function dateToJD(date){ return date.getTime()/86400000 + 2440587.5; }
@@ -1486,6 +1543,7 @@ function computeOrbitState(date){
   return {earthX, earthZ, moonRelX, moonRelY, moonRelZ, gst, phase, sunR:s.R, moonDistKm:moonDist};
 }
 
+/* ---- tekstur prosedural (canvas), tanpa perlu file gambar eksternal ---- */
 function orbitGlowTexture(){
   const size=128;
   const c=document.createElement('canvas'); c.width=c.height=size;
@@ -1497,12 +1555,119 @@ function orbitGlowTexture(){
   ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
   return new THREE.CanvasTexture(c);
 }
-function orbitRing(radius, color){
+function orbitSunTexture(){
+  const w=512,h=256;
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx=c.getContext('2d');
+  const base=ctx.createLinearGradient(0,0,0,h);
+  base.addColorStop(0,'#fff3c0'); base.addColorStop(0.5,'#ffd35c'); base.addColorStop(1,'#ff9d2e');
+  ctx.fillStyle=base; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<900;i++){
+    const x=Math.random()*w, y=Math.random()*h, r=1+Math.random()*2.4;
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    const bright=Math.random()>0.5;
+    g.addColorStop(0, bright?'rgba(255,255,230,0.55)':'rgba(200,90,10,0.35)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+  return new THREE.CanvasTexture(c);
+}
+function orbitEarthTextures(){
+  const w=1024,h=512;
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#0b3d78'; ctx.fillRect(0,0,w,h);
+  const oceanShade=ctx.createLinearGradient(0,0,0,h);
+  oceanShade.addColorStop(0,'#0a2f66'); oceanShade.addColorStop(0.5,'#1454a3'); oceanShade.addColorStop(1,'#0a2f66');
+  ctx.fillStyle=oceanShade; ctx.fillRect(0,0,w,h);
+  // "benua" — blob acak yang direplikasi supaya terlihat organik
+  function blob(cx,cy,rx,ry,color){
+    ctx.fillStyle=color; ctx.beginPath();
+    const pts=14;
+    for(let i=0;i<=pts;i++){
+      const a=(i/pts)*Math.PI*2;
+      const jr=0.7+Math.random()*0.6;
+      const x=cx+Math.cos(a)*rx*jr, y=cy+Math.sin(a)*ry*jr;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  const green='#2f8a4e', green2='#3aa05c', sand='#c8a465';
+  blob(190,150,120,80,green); blob(230,190,80,50,green2);
+  blob(430,130,150,70,green); blob(520,180,90,60,sand);
+  blob(650,300,140,90,green); blob(700,340,70,40,green2);
+  blob(830,160,110,70,green); blob(900,210,60,40,sand);
+  blob(120,340,100,60,green2); blob(340,380,130,60,green);
+  // tudung es kutub
+  ctx.fillStyle='rgba(240,248,255,0.92)';
+  ctx.fillRect(0,0,w,26); ctx.fillRect(0,h-26,w,26);
+  const map = new THREE.CanvasTexture(c);
+  map.wrapS = THREE.RepeatWrapping;
+
+  // peta awan (alpha map)
+  const cc=document.createElement('canvas'); cc.width=w; cc.height=h;
+  const cctx=cc.getContext('2d');
+  cctx.clearRect(0,0,w,h);
+  for(let i=0;i<70;i++){
+    const x=Math.random()*w, y=Math.random()*h, rx=20+Math.random()*70, ry=8+Math.random()*24;
+    const g=cctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));
+    g.addColorStop(0,'rgba(255,255,255,0.85)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    cctx.fillStyle=g; cctx.beginPath(); cctx.ellipse(x,y,rx,ry,0,0,Math.PI*2); cctx.fill();
+  }
+  const cloudMap = new THREE.CanvasTexture(cc);
+  cloudMap.wrapS = THREE.RepeatWrapping;
+  return {map, cloudMap};
+}
+function orbitMoonTexture(){
+  const w=512,h=256;
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#a8a8a8'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<10;i++){
+    const x=Math.random()*w,y=Math.random()*h,r=25+Math.random()*45;
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,'rgba(120,120,120,0.55)'); g.addColorStop(1,'rgba(120,120,120,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+  for(let i=0;i<220;i++){
+    const x=Math.random()*w,y=Math.random()*h,r=1.5+Math.random()*7;
+    const g=ctx.createRadialGradient(x-r*0.3,y-r*0.3,0,x,y,r);
+    g.addColorStop(0,'rgba(230,230,230,0.5)'); g.addColorStop(0.6,'rgba(90,90,90,0.5)'); g.addColorStop(1,'rgba(90,90,90,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+  const map = new THREE.CanvasTexture(c);
+  return map;
+}
+function orbitLabelSprite(text){
+  const c=document.createElement('canvas'); c.width=256; c.height=64;
+  const ctx=c.getContext('2d');
+  ctx.font='700 34px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(10,14,28,0.55)';
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(4,10,248,44,12) : ctx.rect(4,10,248,44); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.fillText(text,128,34);
+  const tex=new THREE.CanvasTexture(c);
+  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true, depthWrite:false}));
+  spr.scale.set(4.2,1.05,1);
+  return spr;
+}
+function orbitRing(radius, color, opacity){
   const pts=[];
-  for(let i=0;i<=128;i++){ const a=i/128*Math.PI*2; pts.push(new THREE.Vector3(radius*Math.cos(a),0,-radius*Math.sin(a))); }
+  for(let i=0;i<=160;i++){ const a=i/160*Math.PI*2; pts.push(new THREE.Vector3(radius*Math.cos(a),0,-radius*Math.sin(a))); }
   const geo=new THREE.BufferGeometry().setFromPoints(pts);
-  const mat=new THREE.LineBasicMaterial({color: color||0x3a5a8a, transparent:true, opacity:0.35});
+  const mat=new THREE.LineBasicMaterial({color: color||0x3a5a8a, transparent:true, opacity:opacity!=null?opacity:0.35});
   return new THREE.LineLoop(geo,mat);
+}
+/* atmosfer bumi: Fresnel rim-light shader sederhana, memberi efek cahaya biru di tepi planet */
+function orbitAtmosphereMesh(radius){
+  const vert=`varying vec3 vNormal; varying vec3 vPos;
+    void main(){ vNormal = normalize(normalMatrix*normal); vPos=(modelViewMatrix*vec4(position,1.0)).xyz; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+  const frag=`varying vec3 vNormal; varying vec3 vPos;
+    void main(){
+      float rim = pow(1.05 - abs(dot(normalize(vNormal), normalize(-vPos))), 3.2);
+      gl_FragColor = vec4(0.45,0.7,1.0, rim*0.85);
+    }`;
+  const mat = new THREE.ShaderMaterial({vertexShader:vert, fragmentShader:frag, transparent:true, blending:THREE.AdditiveBlending, side:THREE.BackSide, depthWrite:false});
+  return new THREE.Mesh(new THREE.SphereGeometry(radius*1.18,32,32), mat);
 }
 
 function buildOrbitScene(){
@@ -1514,54 +1679,113 @@ function buildOrbitScene(){
   const renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(w,h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace || renderer.outputColorSpace;
   wrap.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.minDistance = 15;
+  controls.minDistance = 12;
   controls.maxDistance = 320;
+  controls.autoRotate = orbitState.autoRotate;
+  controls.autoRotateSpeed = 0.6;
 
-  // bintang latar
-  const starCount = 1400;
+  // bintang & kabut nebula latar
+  const starCount = 2200;
   const starPos = new Float32Array(starCount*3);
+  const starCol = new Float32Array(starCount*3);
   for(let i=0;i<starCount;i++){
-    const r = 400+Math.random()*400, theta = Math.random()*Math.PI*2, phi = Math.acos((Math.random()*2)-1);
+    const r = 380+Math.random()*420, theta = Math.random()*Math.PI*2, phi = Math.acos((Math.random()*2)-1);
     starPos[i*3] = r*Math.sin(phi)*Math.cos(theta);
     starPos[i*3+1] = r*Math.cos(phi);
     starPos[i*3+2] = r*Math.sin(phi)*Math.sin(theta);
+    const tint = 0.75+Math.random()*0.25, warm = Math.random()>0.85;
+    starCol[i*3]=tint; starCol[i*3+1]=warm?tint*0.85:tint; starCol[i*3+2]=warm?tint*0.65:tint;
   }
   const starGeo = new THREE.BufferGeometry();
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
-  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff, size:1.1, sizeAttenuation:true})));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(starCol,3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({size:1.2, sizeAttenuation:true, vertexColors:true})));
+  // beberapa awan nebula lembut di kejauhan
+  const nebulaTex = orbitGlowTexture();
+  const nebulaColors = [0x4a3f8f, 0x2f6f8f, 0x6f3f6f];
+  for(let i=0;i<5;i++){
+    const spr = new THREE.Sprite(new THREE.SpriteMaterial({map:nebulaTex, color:nebulaColors[i%nebulaColors.length], transparent:true, opacity:0.10, blending:THREE.AdditiveBlending, depthWrite:false}));
+    const r=500+Math.random()*200, theta=Math.random()*Math.PI*2, phi=Math.acos((Math.random()*2)-1);
+    spr.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+    spr.scale.set(260,260,1);
+    scene.add(spr);
+  }
 
-  // matahari
-  const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_SUN_R,32,32), new THREE.MeshBasicMaterial({color:0xffd35c}));
-  const sunLight = new THREE.PointLight(0xfff2d0, 2.4, 0, 0);
+  // matahari (bola bertekstur + korona berlapis animasi + point light pemberi bayangan)
+  const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_SUN_R,48,48), new THREE.MeshBasicMaterial({map:orbitSunTexture()}));
+  const sunLight = new THREE.PointLight(0xfff2d0, 3.0, 0, 0);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.set(1024,1024);
+  sunLight.shadow.camera.near = 1; sunLight.shadow.camera.far = 400;
+  sunLight.shadow.radius = 3;
   sunMesh.add(sunLight);
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({map:orbitGlowTexture(), color:0xffdd88, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
-  glow.scale.set(ORBIT_SUN_R*6, ORBIT_SUN_R*6, 1);
-  sunMesh.add(glow);
+  const coronaLayers = [];
+  [ [3.2,0.55,0xffe6a8], [5.2,0.28,0xffcf7a], [7.5,0.14,0xff9d4d] ].forEach(([scale,op,color])=>{
+    const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:orbitGlowTexture(), color, transparent:true, opacity:op, blending:THREE.AdditiveBlending, depthWrite:false}));
+    spr.scale.set(ORBIT_SUN_R*scale, ORBIT_SUN_R*scale, 1);
+    sunMesh.add(spr); coronaLayers.push(spr);
+  });
   scene.add(sunMesh);
-  scene.add(new THREE.AmbientLight(0x222233, 0.35));
+  scene.add(new THREE.AmbientLight(0x222233, 0.28));
+  if(orbitState.labels){ const lbl=orbitLabelSprite('Matahari'); lbl.position.set(0, ORBIT_SUN_R+2.6, 0); sunMesh.add(lbl); }
 
-  scene.add(orbitRing(ORBIT_AU_UNITS));
+  scene.add(orbitRing(ORBIT_AU_UNITS, 0x3a5a8a, 0.3));
 
-  // bumi (pivot = posisi orbit; tilt = kemiringan sumbu; mesh = bola berotasi)
+  // jejak orbit bumi yang memudar (trail dinamis)
+  const trailGeo = new THREE.BufferGeometry();
+  const trailPos = new Float32Array(ORBIT_TRAIL_LEN*3);
+  const trailCol = new Float32Array(ORBIT_TRAIL_LEN*4);
+  trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos,3));
+  const trailMat = new THREE.LineBasicMaterial({color:0x6fd6ff, transparent:true, opacity:0.5});
+  const trailLine = new THREE.Line(trailGeo, trailMat);
+  scene.add(trailLine);
+
+  // bumi: pivot (posisi orbit) -> tilt (kemiringan sumbu) -> mesh (rotasi harian) + awan + atmosfer
   const earthPivot = new THREE.Group();
   const earthTilt = new THREE.Group();
   earthTilt.rotation.z = rad(ORBIT_EARTH_TILT);
-  const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_EARTH_R,32,32), new THREE.MeshPhongMaterial({color:0x3f8ee0, shininess:10, emissive:0x0a1a2e, emissiveIntensity:0.12}));
+  const {map:earthMap, cloudMap} = orbitEarthTextures();
+  const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_EARTH_R,48,48), new THREE.MeshPhongMaterial({map:earthMap, shininess:14, specular:0x336699}));
+  earthMesh.castShadow = true; earthMesh.receiveShadow = true;
   earthTilt.add(earthMesh);
-  const axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-ORBIT_EARTH_R*1.7,0), new THREE.Vector3(0,ORBIT_EARTH_R*1.7,0)]);
+  const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_EARTH_R*1.015,40,40), new THREE.MeshPhongMaterial({map:cloudMap, transparent:true, opacity:0.55, depthWrite:false}));
+  earthTilt.add(cloudMesh);
+  earthTilt.add(orbitAtmosphereMesh(ORBIT_EARTH_R));
+  if(orbitState.labels){ const lbl=orbitLabelSprite('Bumi'); lbl.position.set(0, ORBIT_EARTH_R+1.6, 0); earthTilt.add(lbl); }
+  const axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-ORBIT_EARTH_R*1.8,0), new THREE.Vector3(0,ORBIT_EARTH_R*1.8,0)]);
   earthTilt.add(new THREE.Line(axisGeo, new THREE.LineBasicMaterial({color:0x88aacc, transparent:true, opacity:0.5})));
   earthPivot.add(earthTilt);
-  earthPivot.add(orbitRing(ORBIT_MOON_DIST_SCALE, 0x666666));
-  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_MOON_R,24,24), new THREE.MeshPhongMaterial({color:0xbfbfbf, shininess:3}));
+  earthPivot.add(orbitRing(ORBIT_MOON_DIST_SCALE, 0x777777, 0.3));
+
+  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_MOON_R,32,32), new THREE.MeshPhongMaterial({map:orbitMoonTexture(), shininess:2}));
+  moonMesh.castShadow = true; moonMesh.receiveShadow = true;
+  if(orbitState.labels){ const lbl=orbitLabelSprite('Bulan'); lbl.position.set(0, ORBIT_MOON_R+1.1, 0); moonMesh.add(lbl); }
   earthPivot.add(moonMesh);
   scene.add(earthPivot);
 
-  window._orbit = {scene,camera,renderer,controls,earthPivot,earthTilt,moonMesh};
+  window._orbit = {scene,camera,renderer,controls,earthPivot,earthTilt,earthMesh,cloudMesh,moonMesh,coronaLayers,trailLine,trailPos,trailCol,trailCount:0,clock:new THREE.Clock()};
+}
+
+function orbitUpdateTrail(o, x, z){
+  const n = ORBIT_TRAIL_LEN;
+  // geser semua titik satu slot ke belakang, titik terbaru di indeks 0
+  for(let i=n-1;i>0;i--){
+    o.trailPos[i*3] = o.trailPos[(i-1)*3];
+    o.trailPos[i*3+1] = o.trailPos[(i-1)*3+1];
+    o.trailPos[i*3+2] = o.trailPos[(i-1)*3+2];
+  }
+  o.trailPos[0]=x; o.trailPos[1]=0; o.trailPos[2]=z;
+  if(o.trailCount<n) o.trailCount++;
+  o.trailLine.geometry.setDrawRange(0, o.trailCount);
+  o.trailLine.geometry.attributes.position.needsUpdate = true;
 }
 
 function updateOrbitScene(date){
@@ -1569,7 +1793,15 @@ function updateOrbitScene(date){
   const st = computeOrbitState(date);
   o.earthPivot.position.set(st.earthX, 0, st.earthZ);
   o.earthTilt.rotation.y = rad(st.gst);
+  o.cloudMesh.rotation.y += 0.0006; // awan bergerak sedikit lebih cepat dari permukaan
   o.moonMesh.position.set(st.moonRelX, st.moonRelY, st.moonRelZ);
+  o.moonMesh.rotation.y += 0.0009;
+  const t = o.clock ? o.clock.getElapsedTime() : 0;
+  o.coronaLayers.forEach((spr,i)=>{
+    const base = ORBIT_SUN_R*[3.2,5.2,7.5][i];
+    const pulse = 1 + Math.sin(t*0.6 + i*2)*0.06;
+    spr.scale.set(base*pulse, base*pulse, 1);
+  });
   const dEl = document.getElementById('orbitDateTime'); if(dEl) dEl.textContent = date.toLocaleString('id-ID',{dateStyle:'medium', timeStyle:'medium'});
   const pEl = document.getElementById('orbitPhaseName'); if(pEl) pEl.textContent = st.phase.name;
   const iEl = document.getElementById('orbitIllum'); if(iEl) iEl.textContent = (st.phase.illum*100).toFixed(1)+'%';
@@ -1582,8 +1814,13 @@ function orbitAnimate(ts){
   if(orbitState.lastTs==null) orbitState.lastTs = ts;
   const dtMs = ts - orbitState.lastTs;
   orbitState.lastTs = ts;
-  if(orbitState.playing) orbitState.simTime = new Date(orbitState.simTime.getTime() + dtMs*orbitState.speedMult);
-  updateOrbitScene(orbitState.simTime);
+  if(orbitState.playing){
+    orbitState.simTime = new Date(orbitState.simTime.getTime() + dtMs*orbitState.speedMult);
+    updateOrbitScene(orbitState.simTime);
+    orbitUpdateTrail(o, o.earthPivot.position.x, o.earthPivot.position.z);
+  } else {
+    updateOrbitScene(orbitState.simTime);
+  }
   o.controls.update();
   o.renderer.render(o.scene, o.camera);
   orbitState.animId = requestAnimationFrame(orbitAnimate);
@@ -1651,6 +1888,11 @@ document.getElementById('orbitNowBtn').addEventListener('click', function(){ orb
 document.getElementById('orbitResetView').addEventListener('click', function(){
   const o = window._orbit; if(!o) return;
   o.camera.position.set(0,55,95); o.controls.target.set(0,0,0); o.controls.update();
+});
+document.getElementById('orbitAutoRotate').addEventListener('click', function(){
+  orbitState.autoRotate = !orbitState.autoRotate;
+  this.classList.toggle('active-toggle', orbitState.autoRotate);
+  const o = window._orbit; if(o) o.controls.autoRotate = orbitState.autoRotate;
 });
 document.getElementById('orbitRetry').addEventListener('click', initOrbit);
 
