@@ -251,6 +251,17 @@
   .subnav .sitem.active{background:var(--gold-grad); color:#2b1c05; border-color:transparent;}
   .subpage{display:none;}
   .subpage.active{display:block;}
+  /* ---------- orbit 3D ---------- */
+  .orbit-wrap{position:relative; width:100%; aspect-ratio:1/1; border-radius:var(--radius-md); overflow:hidden; background:#03050d; touch-action:none;}
+  .orbit-wrap canvas{display:block; width:100%; height:100%;}
+  .orbit-loading, .orbit-fallback{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#aab4d6; font-size:13px; text-align:center; padding:24px; background:#03050d; line-height:1.5;}
+  .orbit-fallback{flex-direction:column; gap:10px;}
+  .orbit-fallback .retry{padding:8px 16px; border-radius:var(--radius-pill); background:var(--gold-grad); color:#2b1c05; font-weight:700; font-size:12.5px; border:none; cursor:pointer;}
+  .orbit-controls{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+  .orbit-select{flex-shrink:0; padding:9px 12px; border-radius:var(--radius-pill); background:var(--glass); border:1px solid var(--glass-border); font-size:12.5px; font-weight:700; color:var(--text-dim); cursor:pointer;}
+  .orbit-legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:11.5px; color:var(--text-faint);}
+  .orbit-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .orbit-legend i{width:9px; height:9px; border-radius:50%; display:inline-block;}
   ::-webkit-scrollbar{width:0px; height:0px;}
   a{color:var(--teal2);}
   .app-footer{text-align:center; padding:20px 10px 10px; color:var(--text-faint); font-size:11.5px; line-height:1.7; max-width:100%; word-break:break-word;}
@@ -428,6 +439,7 @@
         <div class="sitem" data-sub="sub-rashdul">☀️ Rashdul Kiblat</div>
         <div class="sitem" data-sub="sub-gerhana">🌘 Gerhana</div>
         <div class="sitem" data-sub="sub-lokasi">📍 Koordinat Lokasi</div>
+        <div class="sitem" data-sub="sub-orbit">🌐 Orbit 3D</div>
       </div>
 
       <!-- ---- Arah Kiblat ---- -->
@@ -501,6 +513,47 @@
           </div>
           <button class="btn sm" id="custApply">Terapkan Lokasi Kustom</button>
         </div>
+      </div>
+
+      <!-- ---- Orbit 3D Real-time ---- -->
+      <div class="subpage" id="sub-orbit">
+        <div class="card" style="padding:12px;">
+          <div class="orbit-wrap" id="orbitWrap">
+            <div class="orbit-loading" id="orbitLoading">Memuat visualisasi 3D…</div>
+            <div class="orbit-fallback" id="orbitFallback" style="display:none;">
+              <div>⚠️ Modul 3D (Three.js) gagal dimuat.<br>Periksa koneksi internet Anda.</div>
+              <button class="retry" id="orbitRetry">Coba Lagi</button>
+            </div>
+          </div>
+          <div class="orbit-controls">
+            <button class="btn ghost sm" id="orbitPlayBtn">⏸️ Jeda</button>
+            <select class="orbit-select" id="orbitSpeed">
+              <option value="1">Waktu Nyata</option>
+              <option value="60">1 menit / detik</option>
+              <option value="3600" selected>1 jam / detik</option>
+              <option value="86400">1 hari / detik</option>
+              <option value="2592000">1 bulan / detik</option>
+            </select>
+            <button class="btn ghost sm" id="orbitNowBtn">⏱️ Sekarang</button>
+            <button class="btn ghost sm" id="orbitResetView">🎯 Reset Tampilan</button>
+          </div>
+          <div class="orbit-legend">
+            <span><i style="background:#f5c542;"></i>Matahari</span>
+            <span><i style="background:#3fa7e8;"></i>Bumi</span>
+            <span><i style="background:#c9c9c9;"></i>Bulan</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="stat-grid">
+            <div class="stat"><div class="l">Tanggal &amp; Waktu Simulasi</div><div class="n" id="orbitDateTime" style="font-size:12.5px;">—</div></div>
+            <div class="stat"><div class="l">Fase Bulan</div><div class="n teal" id="orbitPhaseName" style="font-size:12.5px;">—</div></div>
+            <div class="stat"><div class="l">Iluminasi Bulan</div><div class="n gold" id="orbitIllum">—</div></div>
+            <div class="stat"><div class="l">Jarak Bumi–Matahari</div><div class="n" id="orbitEarthSunDist" style="font-size:12.5px;">—</div></div>
+            <div class="stat"><div class="l">Jarak Bumi–Bulan</div><div class="n" id="orbitEarthMoonDist" style="font-size:12.5px;">—</div></div>
+            <div class="stat"><div class="l">Kemiringan Sumbu Bumi</div><div class="n" style="font-size:12.5px;">23.44°</div></div>
+          </div>
+        </div>
+        <div class="note">Arah &amp; fase Bulan/Bumi dihitung real-time dari algoritma Jean Meeus yang sama dengan perhitungan lain di aplikasi ini — akurat secara astronomis. Jarak &amp; ukuran benda langit divisualisasikan dengan skala yang disederhanakan (bukan skala asli) agar mudah dilihat. Seret untuk memutar tampilan, cubit/scroll untuk zoom, seret dua jari untuk geser.</div>
       </div>
     </section>
 
@@ -1099,6 +1152,8 @@ window.addEventListener('load', ()=>{
 function showSub(id){
   document.querySelectorAll('.subpage').forEach(p=>p.classList.toggle('active', p.id===id));
   document.querySelectorAll('#subnavLainnya .sitem').forEach(s=>s.classList.toggle('active', s.dataset.sub===id));
+  if(id==='sub-orbit'){ initOrbit(); resumeOrbitLoop(); }
+  else { pauseOrbitLoop(); }
 }
 document.querySelectorAll('#subnavLainnya .sitem').forEach(s=> s.addEventListener('click', ()=> showSub(s.dataset.sub)));
 
@@ -1397,11 +1452,215 @@ document.getElementById('grBtn').addEventListener('click', ()=>{
   }).join('');
 });
 
+/* ================= ORBIT 3D (Matahari–Bumi–Bulan real-time) ================= */
+const ORBIT_AU_UNITS = 38;        // 1 AU -> unit jarak orbit Bumi (skala disederhanakan)
+const ORBIT_SUN_R = 4.5;
+const ORBIT_EARTH_R = 1.5;
+const ORBIT_MOON_R = 0.45;
+const ORBIT_MOON_DIST_BASE = 384400; // km, jarak rata-rata Bumi-Bulan
+const ORBIT_MOON_DIST_SCALE = 7.5;   // unit jarak orbit Bulan pada jarak rata-rata
+const ORBIT_EARTH_TILT = 23.44;
+
+const orbitState = { playing:true, speedMult:3600, simTime:new Date(), animId:null, lastTs:null, threeLoading:false };
+let _orbitScriptsAdded = false;
+
+function dateToJD(date){ return date.getTime()/86400000 + 2440587.5; }
+
+function computeOrbitState(date){
+  const JD = dateToJD(date);
+  const T = (JD-2451545.0)/36525;
+  const s = sunPos(T);
+  const m = moonPos(T);
+  const earthLon = norm360(s.appLon+180);
+  const earthR = s.R * ORBIT_AU_UNITS;
+  const earthX = earthR*Math.cos(rad(earthLon));
+  const earthZ = -earthR*Math.sin(rad(earthLon));
+  const moonDist = m.dist;
+  const moonOrbR = (moonDist/ORBIT_MOON_DIST_BASE)*ORBIT_MOON_DIST_SCALE;
+  const mlon = rad(m.lon), mlat = rad(m.lat*2.2); // lintang ekliptika bulan sedikit dibesarkan agar kemiringan orbit terlihat
+  const moonRelX = moonOrbR*Math.cos(mlat)*Math.cos(mlon);
+  const moonRelY = moonOrbR*Math.sin(mlat);
+  const moonRelZ = -moonOrbR*Math.cos(mlat)*Math.sin(mlon);
+  const gst = gmst(JD);
+  const phase = moonPhaseInfo(JD);
+  return {earthX, earthZ, moonRelX, moonRelY, moonRelZ, gst, phase, sunR:s.R, moonDistKm:moonDist};
+}
+
+function orbitGlowTexture(){
+  const size=128;
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  const ctx=c.getContext('2d');
+  const g=ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+  g.addColorStop(0,'rgba(255,255,255,1)');
+  g.addColorStop(0.4,'rgba(255,220,140,0.5)');
+  g.addColorStop(1,'rgba(255,220,140,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
+  return new THREE.CanvasTexture(c);
+}
+function orbitRing(radius, color){
+  const pts=[];
+  for(let i=0;i<=128;i++){ const a=i/128*Math.PI*2; pts.push(new THREE.Vector3(radius*Math.cos(a),0,-radius*Math.sin(a))); }
+  const geo=new THREE.BufferGeometry().setFromPoints(pts);
+  const mat=new THREE.LineBasicMaterial({color: color||0x3a5a8a, transparent:true, opacity:0.35});
+  return new THREE.LineLoop(geo,mat);
+}
+
+function buildOrbitScene(){
+  const wrap = document.getElementById('orbitWrap');
+  const w = wrap.clientWidth||300, h = wrap.clientHeight||300;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 3000);
+  camera.position.set(0, 55, 95);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(w,h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  wrap.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 15;
+  controls.maxDistance = 320;
+
+  // bintang latar
+  const starCount = 1400;
+  const starPos = new Float32Array(starCount*3);
+  for(let i=0;i<starCount;i++){
+    const r = 400+Math.random()*400, theta = Math.random()*Math.PI*2, phi = Math.acos((Math.random()*2)-1);
+    starPos[i*3] = r*Math.sin(phi)*Math.cos(theta);
+    starPos[i*3+1] = r*Math.cos(phi);
+    starPos[i*3+2] = r*Math.sin(phi)*Math.sin(theta);
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff, size:1.1, sizeAttenuation:true})));
+
+  // matahari
+  const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_SUN_R,32,32), new THREE.MeshBasicMaterial({color:0xffd35c}));
+  const sunLight = new THREE.PointLight(0xfff2d0, 2.4, 0, 0);
+  sunMesh.add(sunLight);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({map:orbitGlowTexture(), color:0xffdd88, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
+  glow.scale.set(ORBIT_SUN_R*6, ORBIT_SUN_R*6, 1);
+  sunMesh.add(glow);
+  scene.add(sunMesh);
+  scene.add(new THREE.AmbientLight(0x222233, 0.35));
+
+  scene.add(orbitRing(ORBIT_AU_UNITS));
+
+  // bumi (pivot = posisi orbit; tilt = kemiringan sumbu; mesh = bola berotasi)
+  const earthPivot = new THREE.Group();
+  const earthTilt = new THREE.Group();
+  earthTilt.rotation.z = rad(ORBIT_EARTH_TILT);
+  const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_EARTH_R,32,32), new THREE.MeshPhongMaterial({color:0x3f8ee0, shininess:10, emissive:0x0a1a2e, emissiveIntensity:0.12}));
+  earthTilt.add(earthMesh);
+  const axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-ORBIT_EARTH_R*1.7,0), new THREE.Vector3(0,ORBIT_EARTH_R*1.7,0)]);
+  earthTilt.add(new THREE.Line(axisGeo, new THREE.LineBasicMaterial({color:0x88aacc, transparent:true, opacity:0.5})));
+  earthPivot.add(earthTilt);
+  earthPivot.add(orbitRing(ORBIT_MOON_DIST_SCALE, 0x666666));
+  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(ORBIT_MOON_R,24,24), new THREE.MeshPhongMaterial({color:0xbfbfbf, shininess:3}));
+  earthPivot.add(moonMesh);
+  scene.add(earthPivot);
+
+  window._orbit = {scene,camera,renderer,controls,earthPivot,earthTilt,moonMesh};
+}
+
+function updateOrbitScene(date){
+  const o = window._orbit; if(!o) return;
+  const st = computeOrbitState(date);
+  o.earthPivot.position.set(st.earthX, 0, st.earthZ);
+  o.earthTilt.rotation.y = rad(st.gst);
+  o.moonMesh.position.set(st.moonRelX, st.moonRelY, st.moonRelZ);
+  const dEl = document.getElementById('orbitDateTime'); if(dEl) dEl.textContent = date.toLocaleString('id-ID',{dateStyle:'medium', timeStyle:'medium'});
+  const pEl = document.getElementById('orbitPhaseName'); if(pEl) pEl.textContent = st.phase.name;
+  const iEl = document.getElementById('orbitIllum'); if(iEl) iEl.textContent = (st.phase.illum*100).toFixed(1)+'%';
+  const esEl = document.getElementById('orbitEarthSunDist'); if(esEl) esEl.textContent = st.sunR.toFixed(4)+' AU';
+  const emEl = document.getElementById('orbitEarthMoonDist'); if(emEl) emEl.textContent = Math.round(st.moonDistKm).toLocaleString('id-ID')+' km';
+}
+
+function orbitAnimate(ts){
+  const o = window._orbit; if(!o){ orbitState.animId=null; return; }
+  if(orbitState.lastTs==null) orbitState.lastTs = ts;
+  const dtMs = ts - orbitState.lastTs;
+  orbitState.lastTs = ts;
+  if(orbitState.playing) orbitState.simTime = new Date(orbitState.simTime.getTime() + dtMs*orbitState.speedMult);
+  updateOrbitScene(orbitState.simTime);
+  o.controls.update();
+  o.renderer.render(o.scene, o.camera);
+  orbitState.animId = requestAnimationFrame(orbitAnimate);
+}
+function resumeOrbitLoop(){
+  if(!window._orbit || orbitState.animId) return;
+  orbitState.lastTs = null;
+  orbitState.animId = requestAnimationFrame(orbitAnimate);
+}
+function pauseOrbitLoop(){
+  if(orbitState.animId){ cancelAnimationFrame(orbitState.animId); orbitState.animId=null; }
+}
+function orbitOnResize(){
+  const o = window._orbit; if(!o) return;
+  const wrap = document.getElementById('orbitWrap');
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  if(!w||!h) return;
+  o.camera.aspect = w/h; o.camera.updateProjectionMatrix();
+  o.renderer.setSize(w,h);
+}
+function showOrbitError(){
+  orbitState.threeLoading=false;
+  const l=document.getElementById('orbitLoading'); if(l) l.style.display='none';
+  const f=document.getElementById('orbitFallback'); if(f) f.style.display='flex';
+}
+function loadThreeLibs(onSuccess,onError){
+  if(typeof THREE!=='undefined' && typeof THREE.OrbitControls!=='undefined'){ onSuccess(); return; }
+  if(_orbitScriptsAdded){ setTimeout(()=>{ (typeof THREE!=='undefined'&&typeof THREE.OrbitControls!=='undefined')?onSuccess():onError(); },4000); return; }
+  _orbitScriptsAdded = true;
+  const s1=document.createElement('script');
+  s1.src='https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js';
+  s1.onload=function(){
+    const s2=document.createElement('script');
+    s2.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+    s2.onload=onSuccess; s2.onerror=onError;
+    document.head.appendChild(s2);
+  };
+  s1.onerror=onError;
+  document.head.appendChild(s1);
+}
+function initOrbit(){
+  if(window._orbit) return;
+  if(orbitState.threeLoading) return;
+  orbitState.threeLoading = true;
+  const l=document.getElementById('orbitLoading'); if(l) l.style.display='flex';
+  const f=document.getElementById('orbitFallback'); if(f) f.style.display='none';
+  loadThreeLibs(function(){
+    orbitState.threeLoading=false;
+    if(typeof THREE==='undefined' || typeof THREE.OrbitControls==='undefined'){ showOrbitError(); return; }
+    try{
+      buildOrbitScene();
+      updateOrbitScene(orbitState.simTime);
+      if(l) l.style.display='none';
+      resumeOrbitLoop();
+      window.addEventListener('resize', orbitOnResize);
+    }catch(e){ console.error(e); showOrbitError(); }
+  }, showOrbitError);
+}
+document.getElementById('orbitPlayBtn').addEventListener('click', function(){
+  orbitState.playing = !orbitState.playing;
+  this.textContent = orbitState.playing ? '⏸️ Jeda' : '▶️ Lanjut';
+});
+document.getElementById('orbitSpeed').addEventListener('change', function(){ orbitState.speedMult = +this.value; });
+document.getElementById('orbitNowBtn').addEventListener('click', function(){ orbitState.simTime = new Date(); });
+document.getElementById('orbitResetView').addEventListener('click', function(){
+  const o = window._orbit; if(!o) return;
+  o.camera.position.set(0,55,95); o.controls.target.set(0,0,0); o.controls.update();
+});
+document.getElementById('orbitRetry').addEventListener('click', initOrbit);
+
 /* ================= PAGE DISPATCH ================= */
 function refreshPage(id){
   if(id==='page-home') renderHome();
   else if(id==='page-kalender') renderKalender();
   else if(id==='page-lainnya'){ renderKiblat(); renderRashdul(); }
+  if(id!=='page-lainnya') pauseOrbitLoop();
+  else if(document.getElementById('sub-orbit') && document.getElementById('sub-orbit').classList.contains('active')){ initOrbit(); resumeOrbitLoop(); }
 }
 
 /* ================= INIT ================= */
