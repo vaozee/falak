@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Hisab Falakiyah — Kalkulator Astronomi Islam</title>
+<meta name="theme-color" content="#eef2fa" id="metaThemeColor">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Falakiyah">
+<meta name="format-detection" content="telephone=no">
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem('falak_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+  })();
+</script>
+<style>
+  :root{
+    /* ===== LIGHT THEME (default) ===== */
+    --bg0:#eef2fa; --bg1:#f4f7fc; --bg2:#ffffff;
+    --glass:rgba(255,255,255,0.55); --glass-strong:rgba(255,255,255,0.78);
+    --glass-border:rgba(25,40,80,0.11); --glass-border-soft:rgba(25,40,80,0.07);
+    --gold:#b9791f; --gold2:#8f5b0f; --teal:#0e8f82; --teal2:#0a7369;
+    --accent-grad:linear-gradient(135deg,#3fc9b4,#2f7fdb);
+    --gold-grad:linear-gradient(135deg,#f0c26a,#dd9a35);
+    --text:#161c2e; --text-dim:#4a5470; --text-faint:#7a869e;
+    --danger:#c4432f; --ok:#1c9459; --warn:#b17a0c;
+    --input-bg:rgba(25,40,80,0.045); --stat-bg:rgba(25,40,80,0.04); --note-bg:rgba(25,40,80,0.035);
+    --cal-cell-bg:rgba(25,40,80,0.035); --card-shadow:0 8px 26px rgba(30,45,90,0.09);
+    --compass-a:rgba(25,40,80,0.07); --compass-b:rgba(25,40,80,0.015); --compass-shadow:inset 0 0 30px rgba(25,40,80,0.08); --compass-tick:rgba(25,40,80,0.22);
+    --modal-overlay:rgba(20,30,55,0.4); --modal-sheet-bg:#ffffff; --modal-shadow:0 -20px 60px rgba(20,30,60,0.18);
+    --header-bg:linear-gradient(180deg, rgba(238,242,250,0.92), rgba(238,242,250,0.75) 70%, transparent);
+    --star-opacity:0; --body-bg-extra:radial-gradient(ellipse 900px 500px at 15% -5%, rgba(63,201,180,0.14), transparent 60%), radial-gradient(ellipse 700px 500px at 100% 0%, rgba(221,154,53,0.10), transparent 55%);
+    --radius-lg:22px; --radius-md:16px; --radius-sm:11px; --radius-pill:999px;
+    --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html[data-theme="dark"]{
+    --bg0:#060a16; --bg1:#0b1225; --bg2:#0f1830;
+    --glass:rgba(255,255,255,0.06); --glass-strong:rgba(255,255,255,0.11);
+    --glass-border:rgba(255,255,255,0.13); --glass-border-soft:rgba(255,255,255,0.07);
+    --gold:#e8c072; --gold2:#f5da9a; --teal:#5fd6c4; --teal2:#8be9dc;
+    --accent-grad:linear-gradient(135deg,#5fd6c4,#3f8ee8);
+    --gold-grad:linear-gradient(135deg,#f5da9a,#e8a94f);
+    --text:#f3f5fb; --text-dim:#b9c2d9; --text-faint:#7986a6;
+    --danger:#f0806e; --ok:#68d99a; --warn:#f0c069;
+    --input-bg:rgba(255,255,255,0.05); --stat-bg:rgba(255,255,255,0.045); --note-bg:rgba(255,255,255,0.035);
+    --cal-cell-bg:rgba(255,255,255,0.03); --card-shadow:0 8px 30px rgba(0,0,0,0.25);
+    --compass-a:rgba(255,255,255,0.07); --compass-b:rgba(255,255,255,0.02); --compass-shadow:inset 0 0 30px rgba(0,0,0,0.3); --compass-tick:rgba(255,255,255,0.15);
+    --modal-overlay:rgba(0,0,0,0.55); --modal-sheet-bg:#0b1225; --modal-shadow:0 -20px 60px rgba(0,0,0,0.5);
+    --header-bg:linear-gradient(180deg, rgba(6,10,22,0.92), rgba(6,10,22,0.75) 70%, transparent);
+    --star-opacity:0.55; --body-bg-extra:radial-gradient(ellipse 900px 500px at 15% -5%, rgba(95,214,196,0.16), transparent 60%), radial-gradient(ellipse 700px 500px at 100% 0%, rgba(232,192,114,0.10), transparent 55%);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif;
+    background: linear-gradient(180deg, var(--bg0), var(--bg1) 40%, var(--bg2));
+    color:var(--text); overscroll-behavior:none; -webkit-font-smoothing:antialiased;
+    transition:background .35s ease, color .35s ease;
+  }
+  .bgglow{position:fixed; inset:0; z-index:0; pointer-events:none; background:var(--body-bg-extra); background-repeat:no-repeat; transition:background .35s ease;}
+  .stars{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:var(--star-opacity); transition:opacity .35s ease;
+    background-image:
+      radial-gradient(1.4px 1.4px at 20% 20%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 75% 12%, #fff, transparent),
+      radial-gradient(1px 1px at 55% 35%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 90% 55%, #fff, transparent),
+      radial-gradient(1px 1px at 10% 65%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 35% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 65% 90%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 85% 78%, #fff, transparent);
+    background-repeat:no-repeat;
+  }
+  .app{position:relative; z-index:1; max-width:520px; margin:0 auto; min-height:100%; display:flex; flex-direction:column;}
+  /* ---------- header ---------- */
+  header.top{
+    position:sticky; top:0; z-index:20; padding:calc(var(--safe-top) + 14px) 18px 12px;
+    background:var(--header-bg);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  header.top .htxt{min-width:0; flex:1;}
+  header.top h1{font-size:19px; margin:0; font-weight:800; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  header.top .sub{font-size:12px; color:var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hdr-actions{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .theme-toggle{
+    width:38px; height:38px; border-radius:50%; background:var(--glass); border:1px solid var(--glass-border);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; color:var(--text-dim);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  }
+  .theme-toggle svg{width:18px; height:18px;}
+  .theme-toggle .ic-sun{display:none;} .theme-toggle .ic-moon{display:block;}
+  html[data-theme="dark"] .theme-toggle .ic-sun{display:block;} html[data-theme="dark"] .theme-toggle .ic-moon{display:none;}
+  .loc-chip{
+    display:flex; align-items:center; gap:6px; background:var(--glass); border:1px solid var(--glass-border);
+    padding:8px 12px; border-radius:var(--radius-pill); font-size:12px; color:var(--text-dim); flex-shrink:0; cursor:pointer;
+    max-width:150px;
+  }
+  .loc-chip span.dot{width:6px;height:6px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal); flex-shrink:0;}
+  .loc-chip b{color:var(--text); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* ---------- main ---------- */
+  main{flex:1; padding:4px 16px calc(96px + var(--safe-bottom)); overflow-y:auto;}
+  .page{display:none; animation:fadein .25s ease;}
+  .page.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  h2.sect{font-size:14px; text-transform:uppercase; letter-spacing:.09em; color:var(--text-faint); font-weight:700; margin:22px 2px 10px;}
+  h2.sect:first-child{margin-top:6px;}
+  /* ---------- glass card ---------- */
+  .card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-lg);
+    padding:16px; margin-bottom:12px; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    box-shadow:var(--card-shadow);
+  }
+  .card-head{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .card-head .ic{width:36px; height:36px; border-radius:12px; background:var(--gold-grad); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; box-shadow:0 4px 14px rgba(232,192,114,0.35);}
+  .card-head .ic.teal{background:var(--accent-grad); box-shadow:0 4px 14px rgba(95,214,196,0.3);}
+  .card-head .t{font-size:15.5px; font-weight:800;}
+  .card-head .s{font-size:12px; color:var(--text-faint); margin-top:1px;}
+  .divider{height:1px; background:linear-gradient(90deg,transparent,var(--glass-border),transparent); margin:12px 0;}
+  /* ---------- form controls ---------- */
+  label.lbl{display:block; font-size:12px; color:var(--text-faint); font-weight:600; margin:0 0 6px 2px;}
+  .field{margin-bottom:12px;}
+  select, input[type=text], input[type=number], input[type=date]{
+    width:100%; background:var(--input-bg); border:1px solid var(--glass-border-soft); color:var(--text);
+    padding:11px 12px; border-radius:var(--radius-sm); font-size:14.5px; font-family:inherit; outline:none;
+  }
+  select:focus, input:focus{border-color:rgba(95,214,196,0.5);}
+  select{-webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237986a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:18px; padding-right:34px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%; border:none; cursor:pointer;
+    background:var(--accent-grad); color:#04201c; font-weight:800; font-size:14.5px; padding:13px; border-radius:var(--radius-md);
+    box-shadow:0 8px 22px rgba(95,214,196,0.25); transition:transform .15s;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn.gold{background:var(--gold-grad); color:#2b1c05; box-shadow:0 8px 22px rgba(232,192,114,0.25);}
+  .btn.ghost{background:var(--glass); color:var(--text); border:1px solid var(--glass-border); box-shadow:none;}
+  .btn.sm{padding:9px; font-size:13px; border-radius:var(--radius-sm);}
+  .chips{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{padding:8px 14px; border-radius:var(--radius-pill); background:var(--glass); border:1px solid var(--glass-border); font-size:12.5px; font-weight:700; color:var(--text-dim); cursor:pointer;}
+  .chip.active{background:var(--accent-grad); color:#04201c; border-color:transparent;}
+  /* ---------- result rows ---------- */
+  .kv{display:flex; align-items:center; justify-content:space-between; padding:10px 2px; border-bottom:1px dashed var(--glass-border-soft); gap:10px;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{font-size:12.5px; color:var(--text-faint); flex-shrink:0;}
+  .kv .v{font-size:13.5px; font-weight:700; text-align:right;}
+  .kv .v.big{font-size:17px; color:var(--teal2);}
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .stat{background:var(--stat-bg); border:1px solid var(--glass-border-soft); border-radius:var(--radius-md); padding:12px 14px;}
+  .stat .l{font-size:11px; color:var(--text-faint); font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .stat .n{font-size:18px; font-weight:800; margin-top:4px; color:var(--text);}
+  .stat .n.gold{color:var(--gold2);}
+  .stat .n.teal{color:var(--teal2);}
+  .badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800; padding:5px 11px; border-radius:var(--radius-pill); background:rgba(104,217,154,0.15); color:var(--ok); border:1px solid rgba(104,217,154,0.3);}
+  .badge.warn{background:rgba(240,192,105,0.15); color:var(--warn); border-color:rgba(240,192,105,0.3);}
+  .badge.danger{background:rgba(240,128,110,0.15); color:var(--danger); border-color:rgba(240,128,110,0.3);}
+  .note{font-size:12px; color:var(--text-faint); line-height:1.55; padding:11px 13px; background:var(--note-bg); border:1px dashed var(--glass-border-soft); border-radius:var(--radius-sm); margin-top:10px;}
+  .note b{color:var(--text-dim);}
+  .conclusion{padding:12px 13px; border-radius:var(--radius-md); background:rgba(95,214,196,0.08); border:1px solid rgba(95,214,196,0.22); font-size:13px; line-height:1.6; margin-bottom:10px;}
+  .conclusion b{color:var(--teal2);}
+  .isbat-banner{display:flex; gap:10px; align-items:flex-start; padding:13px 14px; border-radius:var(--radius-md); background:rgba(240,192,105,0.14); border:1px solid rgba(240,192,105,0.35); margin-bottom:14px;}
+  .isbat-banner .ic{font-size:20px; flex-shrink:0; line-height:1.3;}
+  .isbat-banner .t{font-size:12.5px; line-height:1.55; color:var(--text-dim);}
+  .isbat-banner .t b{color:var(--warn);}
+  /* ---------- hero / home ---------- */
+  .hero{border-radius:26px; padding:22px 20px; position:relative; overflow:hidden; margin-bottom:14px;
+    background:linear-gradient(135deg, rgba(63,142,232,0.22), rgba(95,214,196,0.12)); border:1px solid var(--glass-border);
+  }
+  .hero .moonbg{position:absolute; right:-18px; top:-18px; font-size:110px; opacity:.16; filter:blur(0.3px);}
+  .hero .hijri{font-size:23px; font-weight:900; letter-spacing:.2px;}
+  .hero .greg{font-size:13px; color:var(--text-dim); margin-top:4px;}
+  .hero .loc{font-size:12px; color:var(--text-faint); margin-top:10px; display:flex; align-items:center; gap:6px;}
+  .quick-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:14px;}
+  .qbtn{background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:12px 6px; text-align:center; cursor:pointer;}
+  .qbtn .ic{font-size:20px;}
+  .qbtn .lb{font-size:10px; color:var(--text-dim); margin-top:5px; font-weight:700;}
+  table.mini{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.mini th{text-align:center; color:var(--text-faint); font-weight:700; padding:6px 2px; font-size:10.5px; text-transform:uppercase;}
+  table.mini td{text-align:center; padding:8px 2px; font-weight:700;}
+  table.mini tr:not(:last-child) td{border-bottom:1px dashed var(--glass-border-soft);}
+  /* ---------- calendar grid ---------- */
+  .cal-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .cal-nav .cbtn{width:36px; height:36px; border-radius:50%; background:var(--glass); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; color:var(--text);}
+  .cal-nav .title{text-align:center;}
+  .cal-nav .title .h1r{font-size:16px; font-weight:800;}
+  .cal-nav .title .h2r{font-size:11px; color:var(--text-faint);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cal-grid .dow{font-size:10px; text-align:center; color:var(--text-faint); font-weight:700; padding-bottom:4px;}
+  .cal-cell{aspect-ratio:1; border-radius:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--cal-cell-bg); position:relative; font-size:12.5px; font-weight:700;}
+  .cal-cell.empty{background:transparent;}
+  .cal-cell .hj{font-size:9px; color:var(--gold2); font-weight:700; margin-top:1px;}
+  .cal-cell.today{background:var(--accent-grad); color:#04201c;}
+  .cal-cell.today .hj{color:#04201c;}
+  .cal-cell.marked::after{content:''; position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--gold);}
+  /* ---------- qibla compass ---------- */
+  .compass-wrap{display:flex; flex-direction:column; align-items:center; padding:8px 0 4px;}
+  .compass{width:220px; height:220px; border-radius:50%; position:relative; background:radial-gradient(circle at 50% 40%, var(--compass-a), var(--compass-b)); border:1px solid var(--glass-border); box-shadow:var(--compass-shadow);}
+  .compass .tick{position:absolute; left:50%; top:50%; width:1px; height:104px; background:var(--compass-tick); transform-origin:top center;}
+  .compass .dirlabel{position:absolute; left:50%; top:50%; font-size:11px; font-weight:800; color:var(--text-faint); transform-origin:0 0;}
+  .compass .needle{position:absolute; left:50%; top:50%; width:5px; height:96px; margin-left:-2.5px; margin-top:-96px; transform-origin:50% 96px; background:linear-gradient(180deg,var(--gold),transparent 85%); border-radius:4px;}
+  .compass .kaaba{position:absolute; left:50%; top:50%; width:26px; height:26px; margin:-13px; font-size:20px; display:flex; align-items:center; justify-content:center; transform-origin:50% 96px;}
+  .compass .center{position:absolute; left:50%; top:50%; width:10px; height:10px; margin:-5px; border-radius:50%; background:var(--text);}
+  /* ---------- location modal ---------- */
+  .modal-bg{position:fixed; inset:0; background:var(--modal-overlay); backdrop-filter:blur(4px); z-index:90; display:none; align-items:flex-end;}
+  .modal-bg.show{display:flex;}
+  .modal-sheet{width:100%; max-width:520px; margin:0 auto; background:var(--modal-sheet-bg); border:1px solid var(--glass-border); border-top-left-radius:26px; border-top-right-radius:26px; padding:18px 18px calc(20px + var(--safe-bottom)); max-height:82vh; overflow-y:auto; box-shadow:var(--modal-shadow);}
+  .modal-sheet .handle{width:38px; height:4px; border-radius:2px; background:var(--glass-border); margin:0 auto 14px;}
+  .modal-sheet h3{margin:0 0 12px; font-size:16px;}
+  .city-item{padding:11px 4px; border-bottom:1px dashed var(--glass-border-soft); cursor:pointer; display:flex; justify-content:space-between; align-items:center;}
+  .city-item .n{font-weight:700; font-size:13.5px;}
+  .city-item .c{font-size:11px; color:var(--text-faint);}
+  /* ---------- liquid glass bottom dock ---------- */
+  .dockspacer{height:0;}
+  .ldock-outer{position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; justify-content:center; padding-bottom:calc(10px + var(--safe-bottom)); pointer-events:none;}
+  .ldock{
+    position:relative; pointer-events:auto; display:flex; align-items:center; gap:0;
+    width:min(calc(100vw - 40px), 400px); height:50px; border-radius:25px; padding:0 3px;
+    background:linear-gradient(160deg,#2f6fe0,#1747a8 55%,#0f2e73);
+    box-shadow:0 10px 24px rgba(10,30,90,0.4), inset 0 1px 1px rgba(255,255,255,0.25);
+  }
+  .ldock-bubble{
+    position:absolute; top:-8px; height:66px; border-radius:20px; z-index:1;
+    background:linear-gradient(160deg, rgba(255,255,255,0.32), rgba(255,255,255,0.06) 60%);
+    border:1px solid rgba(255,255,255,0.45);
+    backdrop-filter:blur(10px) saturate(1.4); -webkit-backdrop-filter:blur(10px) saturate(1.4);
+    box-shadow:0 8px 18px rgba(5,15,45,0.32), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -6px 14px rgba(255,255,255,0.08);
+    transition:left .38s cubic-bezier(.34,1.4,.4,1), width .38s cubic-bezier(.34,1.4,.4,1);
+  }
+  .ldock-btn{
+    position:relative; z-index:2; flex:1; height:50px; border:none; background:transparent; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    color:rgba(255,255,255,0.68); transition:transform .3s cubic-bezier(.34,1.4,.4,1), color .25s;
+  }
+  .ldock-btn .ic{width:17px; height:17px; display:flex; align-items:center; justify-content:center; opacity:0.82; transition:transform .3s cubic-bezier(.34,1.6,.4,1), opacity .25s;}
+  .ldock-btn .ic svg{width:100%; height:100%;}
+  .ldock-btn .lb{font-size:8.5px; font-weight:700; letter-spacing:.01em; opacity:0; height:0; transition:opacity .25s;}
+  .ldock-btn.active{color:#fff; transform:translateY(-9px);}
+  .ldock-btn.active .ic{transform:scale(1.08); opacity:1;}
+  .ldock-btn.active .lb{opacity:1; height:auto; margin-top:1px;}
+  .ldock-btn:active{transform:scale(0.92);}
+  .ldock-btn.active:active{transform:translateY(-9px) scale(0.94);}
+  /* subnav pills for "lainnya" */
+  .subnav{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:14px; -ms-overflow-style:none; scrollbar-width:none;}
+  .subnav::-webkit-scrollbar{display:none;}
+  .subnav .sitem{flex-shrink:0; display:flex; align-items:center; gap:6px; padding:9px 14px; border-radius:var(--radius-pill); background:var(--glass); border:1px solid var(--glass-border); font-size:12.5px; font-weight:700; color:var(--text-dim); cursor:pointer;}
+  .subnav .sitem.active{background:var(--gold-grad); color:#2b1c05; border-color:transparent;}
+  .subpage{display:none;}
+  .subpage.active{display:block;}
+  ::-webkit-scrollbar{width:0px; height:0px;}
+  a{color:var(--teal2);}
+  .app-footer{text-align:center; padding:20px 10px 10px; color:var(--text-faint); font-size:11.5px; line-height:1.7; max-width:100%; word-break:break-word;}
+  .app-footer .af-line a{color:var(--text-faint); text-decoration:underline; text-decoration-color:var(--glass-border);}
+  .spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(4,32,28,0.3);border-top-color:#04201c;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="bgglow"></div>
+<div class="stars"></div>
+<div class="app">
+
+  <header class="top">
+    <div class="htxt">
+      <h1 id="hdrTitle">Hisab Falakiyah</h1>
+      <div class="sub" id="hdrSub">Kalkulator astronomi Islam offline</div>
+    </div>
+    <div class="hdr-actions">
+      <div class="theme-toggle" id="themeToggle">
+        <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M15 3a9 9 0 1 0 6 15.5A9.5 9.5 0 0 1 15 3Z"/></svg>
+      </div>
+      <div class="loc-chip" id="locChip">
+        <span class="dot"></span>
+        <b id="locChipName">Pilih Lokasi</b>
+      </div>
+    </div>
+  </header>
+
+  <main id="mainEl">
+
+    <!-- ============ PAGE: BERANDA ============ -->
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="moonbg">🌙</div>
+        <div class="hijri" id="homeHijri">—</div>
+        <div class="greg" id="homeGreg">—</div>
+        <div class="loc" id="homeLoc">📍 Pilih lokasi Anda</div>
+        <div class="quick-grid">
+          <div class="qbtn" data-nav="page-kalender"><div class="ic">📅</div><div class="lb">Kalender</div></div>
+          <div class="qbtn" data-nav="page-awalbulan"><div class="ic">🌙</div><div class="lb">Awal Bulan</div></div>
+          <div class="qbtn" data-nav="page-imsakiyah"><div class="ic">🕌</div><div class="lb">Imsakiyah</div></div>
+          <div class="qbtn" data-nav="page-lainnya" data-sub="sub-kiblat"><div class="ic">🧭</div><div class="lb">Kiblat</div></div>
+        </div>
+      </div>
+
+      <h2 class="sect">Jadwal Sholat Hari Ini</h2>
+      <div class="card" id="homePrayerCard">
+        <table class="mini" id="homePrayerTable"></table>
+      </div>
+
+      <h2 class="sect">Posisi Bulan &amp; Matahari</h2>
+      <div class="card">
+        <div class="stat-grid">
+          <div class="stat"><div class="l">Fase Bulan</div><div class="n gold" id="homeMoonPhase">—</div></div>
+          <div class="stat"><div class="l">Umur Bulan</div><div class="n" id="homeMoonAge">—</div></div>
+          <div class="stat"><div class="l">Iluminasi</div><div class="n teal" id="homeIllum">—</div></div>
+          <div class="stat"><div class="l">Arah Kiblat</div><div class="n gold" id="homeQibla">—</div></div>
+        </div>
+      </div>
+      <div class="note">Aplikasi ini menghitung menggunakan metode <b>hisab hakiki</b> (algoritma astronomi Meeus, akurasi menit-busur) yang berjalan sepenuhnya offline di perangkat Anda. Untuk penetapan awal bulan Hijriyah secara syar'i (Ramadhan, Syawal, Dzulhijjah), tetap rujuk pengumuman resmi <b>sidang isbat Kemenag RI</b> atau ormas terkait.</div>
+    </section>
+
+    <!-- ============ PAGE: KALENDER ============ -->
+    <section class="page" id="page-kalender">
+      <h2 class="sect">Kalender Hijriyah</h2>
+      <div class="card">
+        <div class="cal-nav">
+          <div class="cbtn" id="calPrev">‹</div>
+          <div class="title"><div class="h1r" id="calTitleH">—</div><div class="h2r" id="calTitleM">—</div></div>
+          <div class="cbtn" id="calNext">›</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="note" id="calNote"></div>
+      </div>
+
+      <h2 class="sect">Konversi Tanggal</h2>
+      <div class="card">
+        <div class="chips" style="margin-bottom:12px;">
+          <div class="chip active" id="convModeMH">Masehi → Hijriyah</div>
+          <div class="chip" id="convModeHM">Hijriyah → Masehi</div>
+        </div>
+        <div id="convMasehiIn">
+          <label class="lbl">Tanggal Masehi</label>
+          <input type="date" id="convDateIn">
+        </div>
+        <div id="convHijriIn" style="display:none;">
+          <div class="row3">
+            <div class="field"><label class="lbl">Tanggal</label><input type="number" id="convHD" min="1" max="30" value="1"></div>
+            <div class="field"><label class="lbl">Bulan</label>
+              <select id="convHM"></select>
+            </div>
+            <div class="field"><label class="lbl">Tahun H</label><input type="number" id="convHY" value="1447"></div>
+          </div>
+        </div>
+        <button class="btn" id="convBtn">Konversi</button>
+        <div class="divider"></div>
+        <div class="kv"><div class="k">Hasil</div><div class="v big" id="convResult">—</div></div>
+      </div>
+      <div class="note">Kalender &amp; konversi menggunakan hisab hakiki wujudul hilal berbasis posisi Bulan-Matahari aktual (bukan tabel aritmatik), disesuaikan lokasi yang dipilih. Tanggal di sekitar awal bulan dapat berbeda ±1 hari dari penetapan rukyat resmi.</div>
+    </section>
+
+    <!-- ============ PAGE: AWAL BULAN ============ -->
+    <section class="page" id="page-awalbulan">
+      <h2 class="sect">Hisab Awal Bulan Hijriyah</h2>
+      <div class="card">
+        <div class="row2">
+          <div class="field"><label class="lbl">Bulan Hijriyah</label>
+            <select id="abMonth"></select>
+          </div>
+          <div class="field"><label class="lbl">Tahun Hijriyah</label><input type="number" id="abYear" value="1447"></div>
+        </div>
+        <button class="btn gold" id="abBtn">Hitung Hilal</button>
+      </div>
+
+      <div id="abResultWrap" style="display:none;">
+        <div id="abIsbatNote"></div>
+        <h2 class="sect">Data Ijtimak &amp; Hilal</h2>
+        <div class="card">
+          <div class="kv"><div class="k">Ijtimak (konjungsi)</div><div class="v" id="abIjtimak">—</div></div>
+          <div class="kv"><div class="k">Matahari Terbenam (Ghurub)</div><div class="v" id="abGhurub">—</div></div>
+          <div class="divider"></div>
+          <div class="stat-grid">
+            <div class="stat"><div class="l">Tinggi Hilal Hakiki</div><div class="n gold" id="abAltHakiki">—</div></div>
+            <div class="stat"><div class="l">Tinggi Hilal Mar'i</div><div class="n gold" id="abAltMari">—</div></div>
+            <div class="stat"><div class="l">Elongasi</div><div class="n teal" id="abElong">—</div></div>
+            <div class="stat"><div class="l">Umur Bulan saat Ghurub</div><div class="n teal" id="abAge">—</div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="kv"><div class="k">Azimuth Matahari</div><div class="v" id="abAzSun">—</div></div>
+          <div class="kv"><div class="k">Azimuth Bulan</div><div class="v" id="abAzMoon">—</div></div>
+          <div class="kv"><div class="k">Lama Hilal di Atas Ufuk</div><div class="v" id="abLama">—</div></div>
+        </div>
+
+        <h2 class="sect">Kesimpulan Kriteria</h2>
+        <div class="card" id="abCriteriaCard"></div>
+        <div class="note">Perhitungan bersifat estimasi hisab hakiki (akurasi menit-busur). Hasil bukan pengganti keputusan sidang isbat / rukyatul hilal resmi.</div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: IMSAKIYAH ============ -->
+    <section class="page" id="page-imsakiyah">
+      <h2 class="sect">Jadwal Imsakiyah / Waktu Sholat</h2>
+      <div class="card">
+        <div class="row2">
+          <div class="field"><label class="lbl">Bulan</label>
+            <select id="imMonth"></select>
+          </div>
+          <div class="field"><label class="lbl">Tahun</label><input type="number" id="imYear"></div>
+        </div>
+        <div class="field">
+          <label class="lbl">Madzhab Ashar</label>
+          <div class="chips">
+            <div class="chip active" data-asr="1">Syafi'i / Jumhur</div>
+            <div class="chip" data-asr="2">Hanafi</div>
+          </div>
+        </div>
+        <button class="btn" id="imBtn">Buat Jadwal Sebulan</button>
+      </div>
+
+      <div id="imResultWrap" style="display:none;">
+        <h2 class="sect" id="imTitle">Jadwal</h2>
+        <div class="card" style="overflow-x:auto;">
+          <table class="mini" id="imTable" style="min-width:520px;"></table>
+        </div>
+        <div class="note">Kriteria: Imsak = Shubuh −20°, Shubuh −20°, Terbit/Maghrib memperhitungkan ketinggian tempat, Isya −18°, ditambah ihtiyat (kehati-hatian) 2 menit — mengikuti standar hisab yang umum dipakai di Indonesia (Kemenag).</div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE: LAINNYA ============ -->
+    <section class="page" id="page-lainnya">
+      <div class="subnav" id="subnavLainnya">
+        <div class="sitem active" data-sub="sub-kiblat">🧭 Arah Kiblat</div>
+        <div class="sitem" data-sub="sub-rashdul">☀️ Rashdul Kiblat</div>
+        <div class="sitem" data-sub="sub-gerhana">🌘 Gerhana</div>
+        <div class="sitem" data-sub="sub-lokasi">📍 Koordinat Lokasi</div>
+      </div>
+
+      <!-- ---- Arah Kiblat ---- -->
+      <div class="subpage active" id="sub-kiblat">
+        <div class="card">
+          <div class="compass-wrap">
+            <div class="compass" id="compass">
+              <div class="needle" id="qNeedle"></div>
+              <div class="kaaba" id="qKaaba">🕋</div>
+              <div class="center"></div>
+            </div>
+          </div>
+          <div class="stat-grid" style="margin-top:14px;">
+            <div class="stat"><div class="l">Azimuth Kiblat (dr Utara)</div><div class="n gold" id="qAzimuth">—</div></div>
+            <div class="stat"><div class="l">Arah</div><div class="n teal" id="qDir">—</div></div>
+            <div class="stat"><div class="l">Jarak ke Ka'bah</div><div class="n" id="qDist">—</div></div>
+            <div class="stat"><div class="l">Lokasi</div><div class="n" id="qLoc" style="font-size:13px;">—</div></div>
+          </div>
+        </div>
+        <div class="note">Arah kiblat dihitung dari koordinat Ka'bah (21.4225° LU, 39.8262° BT) menggunakan rumus bearing lingkaran besar (great-circle). Untuk kalibrasi presisi tinggi, gunakan metode <b>Rashdul Kiblat</b>.</div>
+      </div>
+
+      <!-- ---- Rashdul Kiblat ---- -->
+      <div class="subpage" id="sub-rashdul">
+        <div class="card">
+          <div class="card-head"><div class="ic">☀️</div><div><div class="t">Rashdul Kiblat Global Tahunan</div><div class="s">Matahari tepat di atas Ka'bah</div></div></div>
+          <div class="kv"><div class="k">27/28 Mei (musim ini)</div><div class="v" id="rkGlobal1">—</div></div>
+          <div class="kv"><div class="k">15/16 Juli (musim ini)</div><div class="v" id="rkGlobal2">—</div></div>
+          <div class="note">Pada 2 momen ini di seluruh dunia (siang hari), bayangan benda tegak lurus menunjuk <b>tepat berlawanan arah kiblat</b> — cara termudah &amp; paling akurat mengecek arah kiblat.</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ic teal">📆</div><div><div class="t">Rashdul Kiblat Harian</div><div class="s">Untuk lokasi &amp; tanggal Anda</div></div></div>
+          <div class="field"><label class="lbl">Tanggal</label><input type="date" id="rkDate"></div>
+          <button class="btn ghost sm" id="rkBtn">Hitung</button>
+          <div class="divider"></div>
+          <div class="kv"><div class="k">Waktu Rashdul Kiblat</div><div class="v big" id="rkResult">—</div></div>
+        </div>
+      </div>
+
+      <!-- ---- Gerhana ---- -->
+      <div class="subpage" id="sub-gerhana">
+        <div class="card">
+          <div class="field"><label class="lbl">Tahun Masehi</label><input type="number" id="grYear"></div>
+          <button class="btn gold" id="grBtn">Cari Gerhana</button>
+        </div>
+        <div id="grList"></div>
+        <div class="note">Klasifikasi berdasarkan lintang ekliptika Bulan saat ijtimak/istiqbal (kriteria 3-tingkat: Tidak / Mungkin / Pasti Terjadi). Rincian kontak &amp; visibilitas lokal adalah estimasi kasar.</div>
+      </div>
+
+      <!-- ---- Koordinat / Lokasi ---- -->
+      <div class="subpage" id="sub-lokasi">
+        <div class="card">
+          <div class="card-head"><div class="ic teal">📍</div><div><div class="t">Lokasi Aktif</div><div class="s">Dipakai di semua perhitungan</div></div></div>
+          <div class="kv"><div class="k">Nama</div><div class="v" id="locName2">—</div></div>
+          <div class="kv"><div class="k">Lintang</div><div class="v" id="locLat2">—</div></div>
+          <div class="kv"><div class="k">Bujur</div><div class="v" id="locLon2">—</div></div>
+          <div class="kv"><div class="k">Zona Waktu</div><div class="v" id="locTz2">—</div></div>
+          <div class="kv"><div class="k">Ketinggian</div><div class="v" id="locElev2">—</div></div>
+          <button class="btn ghost sm" style="margin-top:10px;" id="openLocFromLokasi">Cari / Ganti Lokasi</button>
+          <button class="btn ghost sm" style="margin-top:8px;" id="gpsBtn">📡 Gunakan GPS Perangkat</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ic">✏️</div><div><div class="t">Lokasi Kustom</div><div class="s">Masukkan koordinat manual</div></div></div>
+          <div class="row2">
+            <div class="field"><label class="lbl">Lintang (+LU / −LS)</label><input type="number" step="0.0001" id="custLat"></div>
+            <div class="field"><label class="lbl">Bujur (+BT / −BB)</label><input type="number" step="0.0001" id="custLon"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label class="lbl">Zona Waktu (UTC+)</label><input type="number" step="0.5" id="custTz" value="7"></div>
+            <div class="field"><label class="lbl">Ketinggian (m)</label><input type="number" id="custElev" value="0"></div>
+          </div>
+          <button class="btn sm" id="custApply">Terapkan Lokasi Kustom</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="app-footer">
+      <div class="af-line">© 2026 by Achmad Fauzi</div>
+      <div class="af-line">Email: <a href="mailto:vaozeei@gmail.com">vaozeei@gmail.com</a></div>
+    </div>
+
+  </main>
+
+  <div class="ldock-outer">
+    <nav class="ldock" id="dock">
+      <div class="ldock-bubble" id="bubble"></div>
+      <button class="ldock-btn active" data-target="page-home"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></span><span class="lb">Beranda</span></button>
+      <button class="ldock-btn" data-target="page-kalender"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span><span class="lb">Kalender</span></button>
+      <button class="ldock-btn" data-target="page-awalbulan"><span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M15.5 3.5a9 9 0 1 0 5.6 16A9.6 9.6 0 0 1 15.5 3.5Z"/></svg></span><span class="lb">Awal Bulan</span></button>
+      <button class="ldock-btn" data-target="page-imsakiyah"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16"/><path d="M5 21v-6.5l2-1.2v-2A5 5 0 0 1 12 6a5 5 0 0 1 5 5.3v2l2 1.2V21"/><path d="M12 6V3M10.3 3h3.4"/><path d="M9.5 21v-4a2.5 2.5 0 0 1 5 0v4"/></svg></span><span class="lb">Imsakiyah</span></button>
+      <button class="ldock-btn" data-target="page-lainnya"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m14.8 9.2-1.6 4.8-4.8 1.6 1.6-4.8 4.8-1.6Z" fill="currentColor" stroke="none"/></svg></span><span class="lb">Lainnya</span></button>
+    </nav>
+  </div>
+
+  <div class="modal-bg" id="locModal">
+    <div class="modal-sheet">
+      <div class="handle"></div>
+      <h3>Pilih Lokasi</h3>
+      <input type="text" id="citySearch" placeholder="Cari nama kota/kabupaten…" style="margin-bottom:10px;">
+      <div id="cityList"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+/* ================= DATA KOTA (374 lokasi, dari basis data Hisab_Falakiyah) ================= */
+const CITIES = [{"n":"KANTOR BESAR PSAM","c":"INDONESIA","lat":-1.62972,"lon":113.19278,"tz":7.0},{"n":"ACEH","c":"INDONESIA","lat":5.58333,"lon":95.33333,"tz":7.0},{"n":"ALAHAN PANJANG","c":"INDONESIA","lat":-1.06667,"lon":100.78333,"tz":7.0},{"n":"AMBOINA","c":"INDONESIA","lat":-3.7,"lon":128.15,"tz":9.0},{"n":"AMBON","c":"INDONESIA","lat":-3.7,"lon":128.79667,"tz":9.0},{"n":"AMUNTAI","c":"INDONESIA","lat":-2.4,"lon":115.3,"tz":8.0},{"n":"ANAK RATU AJI","c":"INDONESIA","lat":-4.94957,"lon":104.96225,"tz":7.0},{"n":"ANAK TUHA","c":"INDONESIA","lat":-5.02803,"lon":105.05574,"tz":7.0},{"n":"ANYER","c":"INDONESIA","lat":-6.05,"lon":105.93333,"tz":7.0},{"n":"AROSBAYA","c":"INDONESIA","lat":-6.93333,"lon":112.86667,"tz":7.0},{"n":"BALIAGE","c":"INDONESIA","lat":3.35,"lon":99.03333,"tz":8.0},{"n":"BALIKPAPAN","c":"INDONESIA","lat":-1.21667,"lon":116.85,"tz":8.0},{"n":"BANDA ACEH","c":"INDONESIA","lat":5.58333,"lon":95.33333,"tz":7.0},{"n":"BANDAR LAMPUNG","c":"INDONESIA","lat":-5.43333,"lon":105.23333,"tz":7.0},{"n":"BANDAR JAYA","c":"INDONESIA","lat":-4.9225,"lon":105.21,"tz":7.0},{"n":"BANDAR MATARAM","c":"INDONESIA","lat":-4.59749,"lon":105.45367,"tz":7.0},{"n":"BANDAR SURABAYA","c":"INDONESIA","lat":-4.69158,"lon":105.71164,"tz":7.0},{"n":"BANDUNG","c":"INDONESIA","lat":-6.95,"lon":107.61667,"tz":7.0},{"n":"BANGGAI","c":"INDONESIA","lat":-1.56667,"lon":123.56667,"tz":8.0},{"n":"BANGKA","c":"INDONESIA","lat":-2.0,"lon":106.0,"tz":7.0},{"n":"BANGKALAN","c":"INDONESIA","lat":-7.05,"lon":112.76667,"tz":7.0},{"n":"BANGKINAN","c":"INDONESIA","lat":0.36667,"lon":101.03333,"tz":7.0},{"n":"BANGKO","c":"INDONESIA","lat":-2.11667,"lon":102.41667,"tz":7.0},{"n":"BANJAR","c":"INDONESIA","lat":-7.38333,"lon":108.53333,"tz":7.0},{"n":"BANJARMASIN","c":"INDONESIA","lat":-3.36667,"lon":114.66667,"tz":8.0},{"n":"BANJARNEGARA","c":"INDONESIA","lat":-7.43333,"lon":109.66667,"tz":7.0},{"n":"BANTEN","c":"INDONESIA","lat":-6.05,"lon":106.13333,"tz":7.0},{"n":"BANTUL","c":"INDONESIA","lat":-7.93333,"lon":110.33333,"tz":7.0},{"n":"BANGUN REJO","c":"INDONESIA","lat":-5.10876,"lon":105.05574,"tz":7.0},{"n":"BANYUMAS","c":"INDONESIA","lat":-7.41667,"lon":114.38333,"tz":7.0},{"n":"BANYUWANGI","c":"INDONESIA","lat":-8.23333,"lon":114.38333,"tz":7.0},{"n":"BARABAI","c":"INDONESIA","lat":-2.53333,"lon":115.36667,"tz":8.0},{"n":"BATANG","c":"INDONESIA","lat":-6.93333,"lon":109.71667,"tz":7.0},{"n":"BATURAJA","c":"INDONESIA","lat":-4.11667,"lon":104.2,"tz":7.0},{"n":"BATUSANGKAR","c":"INDONESIA","lat":-0.45,"lon":100.56667,"tz":7.0},{"n":"BAUBAU","c":"INDONESIA","lat":-5.5,"lon":122.65,"tz":8.0},{"n":"BLAMBANGAN UMPU","c":"INDONESIA","lat":-4.5,"lon":104.48889,"tz":7.0},{"n":"BEKASI","c":"INDONESIA","lat":-6.31667,"lon":107.0,"tz":7.0},{"n":"BEKRI","c":"INDONESIA","lat":-5.09671,"lon":105.13759,"tz":7.0},{"n":"BENGKALIS","c":"INDONESIA","lat":1.51667,"lon":102.13333,"tz":7.0},{"n":"BENGKULU","c":"INDONESIA","lat":-3.8,"lon":102.25,"tz":7.0},{"n":"BIMA","c":"INDONESIA","lat":-8.45,"lon":118.75,"tz":8.0},{"n":"BINJAI","c":"INDONESIA","lat":9.65,"lon":98.45,"tz":7.0},{"n":"BIREUN","c":"INDONESIA","lat":5.28333,"lon":96.68333,"tz":7.0},{"n":"BLANGKAJEREN","c":"INDONESIA","lat":4.03333,"lon":97.3,"tz":7.0},{"n":"BLEGA","c":"INDONESIA","lat":-7.1,"lon":113.11667,"tz":7.0},{"n":"BLITAR","c":"INDONESIA","lat":-8.1,"lon":112.15,"tz":7.0},{"n":"BLORA","c":"INDONESIA","lat":-6.96667,"lon":111.41667,"tz":7.0},{"n":"BOGOR","c":"INDONESIA","lat":-6.61667,"lon":106.8,"tz":7.0},{"n":"BOJONEGORO","c":"INDONESIA","lat":-7.16667,"lon":111.88333,"tz":7.0},{"n":"BONDOWOSO","c":"INDONESIA","lat":-7.91667,"lon":113.83333,"tz":7.0},{"n":"BONTANG","c":"INDONESIA","lat":0.06667,"lon":117.5,"tz":8.0},{"n":"BONTHAIN","c":"INDONESIA","lat":-5.56667,"lon":119.95,"tz":7.0},{"n":"BOYOLALI","c":"INDONESIA","lat":-7.55,"lon":110.58333,"tz":7.0},{"n":"BREBES","c":"INDONESIA","lat":-6.9,"lon":109.03333,"tz":7.0},{"n":"BUKITTINGGI","c":"INDONESIA","lat":-0.3,"lon":100.36667,"tz":7.0},{"n":"BULUKUMBA","c":"INDONESIA","lat":-5.55,"lon":120.2,"tz":8.0},{"n":"BUMI NABUNG","c":"INDONESIA","lat":-4.7044,"lon":105.52572,"tz":7.0},{"n":"BUMI RATU NUBAN","c":"INDONESIA","lat":-5.09502,"lon":105.20778,"tz":7.0},{"n":"BUNGAH","c":"INDONESIA","lat":-7.05412,"lon":112.56917,"tz":7.0},{"n":"BUNTOK","c":"INDONESIA","lat":-1.66667,"lon":114.88333,"tz":8.0},{"n":"CALANG","c":"INDONESIA","lat":-4.68333,"lon":95.6,"tz":7.0},{"n":"CEPU","c":"INDONESIA","lat":-7.16667,"lon":111.58333,"tz":7.0},{"n":"CIAMIS","c":"INDONESIA","lat":-7.35,"lon":108.45,"tz":7.0},{"n":"CIANJUR","c":"INDONESIA","lat":-6.85,"lon":107.13333,"tz":7.0},{"n":"CIBINONG","c":"INDONESIA","lat":-6.48333,"lon":106.85,"tz":7.0},{"n":"CIJULANG","c":"INDONESIA","lat":-7.33333,"lon":108.55,"tz":7.0},{"n":"CIKAJANG","c":"INDONESIA","lat":-7.33333,"lon":107.8,"tz":7.0},{"n":"CILACAP","c":"INDONESIA","lat":-7.75,"lon":109.03333,"tz":7.0},{"n":"CILEGON","c":"INDONESIA","lat":-6.03333,"lon":106.08333,"tz":7.0},{"n":"CIMAHI","c":"INDONESIA","lat":-6.93333,"lon":107.5,"tz":7.0},{"n":"CIREBON","c":"INDONESIA","lat":-6.75,"lon":108.55,"tz":7.0},{"n":"CURUP","c":"INDONESIA","lat":-3.41667,"lon":102.5,"tz":7.0},{"n":"DAYA MURNI","c":"INDONESIA","lat":-4.63111,"lon":105.07333,"tz":7.0},{"n":"DEMAK","c":"INDONESIA","lat":-6.9,"lon":110.61667,"tz":7.0},{"n":"DENPASAR","c":"INDONESIA","lat":-8.61667,"lon":115.21667,"tz":8.0},{"n":"DILLI","c":"INDONESIA","lat":-8.63333,"lon":125.58333,"tz":8.0},{"n":"DOBO","c":"INDONESIA","lat":-5.78333,"lon":134.25,"tz":8.0},{"n":"DOMPU","c":"INDONESIA","lat":-8.5,"lon":118.46667,"tz":8.0},{"n":"DONGGALA","c":"INDONESIA","lat":-0.7,"lon":119.75,"tz":8.0},{"n":"DUMAI","c":"INDONESIA","lat":1.76667,"lon":101.36667,"tz":7.0},{"n":"DURJAN","c":"INDONESIA","lat":-7.0,"lon":113.16667,"tz":7.0},{"n":"ENDEH","c":"INDONESIA","lat":-8.83333,"lon":121.66667,"tz":8.0},{"n":"ENREKANG","c":"INDONESIA","lat":-3.58333,"lon":119.78333,"tz":8.0},{"n":"FAKFAK","c":"INDONESIA","lat":-3.86667,"lon":132.33333,"tz":9.0},{"n":"GARUT","c":"INDONESIA","lat":-7.21667,"lon":107.9,"tz":7.0},{"n":"GEBANG AROSBAYA","c":"INDONESIA","lat":-6.98908,"lon":112.78964,"tz":7.0},{"n":"GEBANG BANGKALAN","c":"INDONESIA","lat":-6.98558,"lon":112.78683,"tz":7.0},{"n":"GEDONGTATAAN","c":"INDONESIA","lat":-5.36667,"lon":105.21667,"tz":7.0},{"n":"GLAGAH","c":"INDONESIA","lat":-7.08028,"lon":112.49278,"tz":7.0},{"n":"GLAGAH LAMONGAN","c":"INDONESIA","lat":-7.08028,"lon":112.49278,"tz":7.0},{"n":"GOMBONG","c":"INDONESIA","lat":-7.58333,"lon":109.51667,"tz":7.0},{"n":"GORONTALO","c":"INDONESIA","lat":0.56667,"lon":123.08333,"tz":8.0},{"n":"GRAJAKAN","c":"INDONESIA","lat":-8.58333,"lon":114.21667,"tz":7.0},{"n":"GRESIK CONDRODIPO","c":"INDONESIA","lat":-7.16975,"lon":112.61736,"tz":7.0},{"n":"GRESIK","c":"INDONESIA","lat":-7.16667,"lon":112.66667,"tz":7.0},{"n":"GUNUNG SITOLI","c":"INDONESIA","lat":1.31667,"lon":97.6,"tz":7.0},{"n":"GUNUNG SUGIH","c":"INDONESIA","lat":-4.98333,"lon":105.18333,"tz":7.0},{"n":"IDI","c":"INDONESIA","lat":4.96667,"lon":97.76667,"tz":7.0},{"n":"INDRAMAYU","c":"INDONESIA","lat":-6.33333,"lon":108.3,"tz":7.0},{"n":"JAKARTA","c":"INDONESIA","lat":-6.16667,"lon":106.81667,"tz":7.0},{"n":"JAMBI","c":"INDONESIA","lat":-1.6,"lon":103.88333,"tz":7.0},{"n":"JAMPEA","c":"INDONESIA","lat":-7.1,"lon":120.68333,"tz":8.0},{"n":"JATINEGARA","c":"INDONESIA","lat":-6.25,"lon":106.86667,"tz":7.0},{"n":"JAYAPURA","c":"INDONESIA","lat":2.46667,"lon":140.63333,"tz":9.0},{"n":"JEMBER","c":"INDONESIA","lat":-8.16667,"lon":113.7,"tz":7.0},{"n":"JENEPONTO","c":"INDONESIA","lat":-5.68333,"lon":119.71667,"tz":8.0},{"n":"JEPARA","c":"INDONESIA","lat":-6.6,"lon":110.65,"tz":7.0},{"n":"JOMBANG","c":"INDONESIA","lat":-7.53333,"lon":112.21667,"tz":7.0},{"n":"KABANJAHE","c":"INDONESIA","lat":3.11667,"lon":98.46667,"tz":7.0},{"n":"KADUNGDUNG","c":"INDONESIA","lat":-7.1,"lon":113.31667,"tz":7.0},{"n":"KALABAHI","c":"INDONESIA","lat":-8.2,"lon":124.53333,"tz":8.0},{"n":"KALIANDA","c":"INDONESIA","lat":-5.78333,"lon":105.56667,"tz":7.0},{"n":"KALIREJO","c":"INDONESIA","lat":-5.2017,"lon":104.97393,"tz":7.0},{"n":"KANDANGAN","c":"INDONESIA","lat":-2.78333,"lon":115.33333,"tz":8.0},{"n":"KANGEAN","c":"INDONESIA","lat":-6.83333,"lon":115.41667,"tz":7.0},{"n":"KARANGAWEN","c":"INDONESIA","lat":-7.04453,"lon":110.5745,"tz":7.0},{"n":"KARANG NUNGGAL","c":"INDONESIA","lat":-7.63333,"lon":108.13333,"tz":7.0},{"n":"KARANGANYAR","c":"INDONESIA","lat":-7.58333,"lon":110.95,"tz":7.0},{"n":"KARAWANG","c":"INDONESIA","lat":-6.3,"lon":107.3,"tz":7.0},{"n":"KAYUAGUNG","c":"INDONESIA","lat":-3.4,"lon":104.88333,"tz":7.0},{"n":"KEBAYORAN","c":"INDONESIA","lat":-6.23333,"lon":106.8,"tz":7.0},{"n":"KEBUMEN","c":"INDONESIA","lat":-7.7,"lon":109.65,"tz":7.0},{"n":"KEDIRI","c":"INDONESIA","lat":-7.81667,"lon":112.0,"tz":7.0},{"n":"KEDONDONG","c":"INDONESIA","lat":-5.52,"lon":105.00861,"tz":7.0},{"n":"KEFAMENANU","c":"INDONESIA","lat":-9.41667,"lon":124.5,"tz":8.0},{"n":"KENDAL","c":"INDONESIA","lat":-6.95,"lon":110.18333,"tz":7.0},{"n":"KENDARI","c":"INDONESIA","lat":-3.95,"lon":122.58333,"tz":8.0},{"n":"KETAPANG KALIMANTAN","c":"INDONESIA","lat":-1.85,"lon":109.96667,"tz":8.0},{"n":"KETAPANG MADURA","c":"INDONESIA","lat":-6.88333,"lon":113.28333,"tz":7.0},{"n":"KLATEN","c":"INDONESIA","lat":-7.73333,"lon":110.58333,"tz":7.0},{"n":"KOLAKA","c":"INDONESIA","lat":-4.03333,"lon":121.61667,"tz":8.0},{"n":"KOTABARU","c":"INDONESIA","lat":-3.28333,"lon":116.21667,"tz":8.0},{"n":"KOTABUMI","c":"INDONESIA","lat":-4.85,"lon":104.85,"tz":7.0},{"n":"KOTAGAJAH","c":"INDONESIA","lat":-4.98667,"lon":105.31889,"tz":7.0},{"n":"KOTAMOBAGO","c":"INDONESIA","lat":0.8,"lon":124.35,"tz":8.0},{"n":"KRAKSAN","c":"INDONESIA","lat":-7.76667,"lon":113.45,"tz":7.0},{"n":"KRUI","c":"INDONESIA","lat":-5.16667,"lon":103.95,"tz":7.0},{"n":"KUALA KAPUAS","c":"INDONESIA","lat":-3.0,"lon":114.43333,"tz":8.0},{"n":"KUALA SIMPANG","c":"INDONESIA","lat":4.31667,"lon":98.05,"tz":7.0},{"n":"KUALA TUNGKAL","c":"INDONESIA","lat":-0.83333,"lon":103.41667,"tz":7.0},{"n":"KUDUS","c":"INDONESIA","lat":-6.83333,"lon":110.83333,"tz":7.0},{"n":"KUNINGAN","c":"INDONESIA","lat":-6.96667,"lon":108.46667,"tz":7.0},{"n":"KUPANG","c":"INDONESIA","lat":-10.2,"lon":123.58333,"tz":8.0},{"n":"KUTACANE","c":"INDONESIA","lat":-3.5,"lon":97.85,"tz":7.0},{"n":"KUTAI","c":"INDONESIA","lat":0.5,"lon":117.0,"tz":8.0},{"n":"LABUHA","c":"INDONESIA","lat":-0.5,"lon":127.48333,"tz":9.0},{"n":"LABUHAN","c":"INDONESIA","lat":-6.4,"lon":105.81667,"tz":7.0},{"n":"LAHAT","c":"INDONESIA","lat":-3.78333,"lon":103.53333,"tz":7.0},{"n":"LAMONGAN","c":"INDONESIA","lat":-7.13333,"lon":112.41667,"tz":7.0},{"n":"LANGSA","c":"INDONESIA","lat":8.51667,"lon":97.96667,"tz":7.0},{"n":"LARANTUKA","c":"INDONESIA","lat":-8.25,"lon":123.0,"tz":8.0},{"n":"LIWA","c":"INDONESIA","lat":-5.03333,"lon":104.08333,"tz":7.0},{"n":"LHOKSEIMAWE","c":"INDONESIA","lat":5.25,"lon":97.11667,"tz":7.0},{"n":"LHOKTUKON","c":"INDONESIA","lat":5.11667,"lon":97.31667,"tz":7.0},{"n":"LUBUK LINGGAU","c":"INDONESIA","lat":-3.28333,"lon":102.9,"tz":7.0},{"n":"LUBUK SIKAPING","c":"INDONESIA","lat":0.08333,"lon":100.16667,"tz":7.0},{"n":"LUMAJANG","c":"INDONESIA","lat":-8.13333,"lon":113.23333,"tz":7.0},{"n":"LUWUK","c":"INDONESIA","lat":-0.91667,"lon":122.81667,"tz":8.0},{"n":"MADIUN","c":"INDONESIA","lat":-7.61667,"lon":111.53333,"tz":7.0},{"n":"MAGETAN","c":"INDONESIA","lat":-7.63333,"lon":111.35,"tz":7.0},{"n":"MAJALENGKA","c":"INDONESIA","lat":-6.83333,"lon":108.2,"tz":7.0},{"n":"MAJENE","c":"INDONESIA","lat":-3.55,"lon":118.98333,"tz":8.0},{"n":"MAKALE","c":"INDONESIA","lat":-3.13333,"lon":119.85,"tz":8.0},{"n":"MALANG","c":"INDONESIA","lat":-7.98333,"lon":112.6,"tz":7.0},{"n":"MALINGPING","c":"INDONESIA","lat":-6.78333,"lon":106.01667,"tz":7.0},{"n":"MAMUJU","c":"INDONESIA","lat":-2.71667,"lon":118.9,"tz":8.0},{"n":"MANADO","c":"INDONESIA","lat":1.55,"lon":124.88333,"tz":8.0},{"n":"MANINJAU","c":"INDONESIA","lat":-0.28333,"lon":100.21667,"tz":7.0},{"n":"MANOKWARI","c":"INDONESIA","lat":-1.0,"lon":134.08333,"tz":9.0},{"n":"MANYAR","c":"INDONESIA","lat":-7.11875,"lon":112.60358,"tz":7.0},{"n":"MARABAHAN","c":"INDONESIA","lat":-3.03333,"lon":114.73333,"tz":8.0},{"n":"MARGATIGA","c":"INDONESIA","lat":-5.18861,"lon":105.51222,"tz":7.0},{"n":"MAROS","c":"INDONESIA","lat":-5.0,"lon":119.58333,"tz":8.0},{"n":"MARTAPURA","c":"INDONESIA","lat":-3.38333,"lon":114.86667,"tz":8.0},{"n":"MATARAM","c":"INDONESIA","lat":-8.6,"lon":116.13333,"tz":8.0},{"n":"MAUMERE","c":"INDONESIA","lat":-8.5,"lon":122.13333,"tz":8.0},{"n":"MEDAN","c":"INDONESIA","lat":3.63333,"lon":98.63333,"tz":7.0},{"n":"MENADO","c":"INDONESIA","lat":1.48333,"lon":124.86667,"tz":8.0},{"n":"MENGGALA","c":"INDONESIA","lat":-4.45,"lon":105.23333,"tz":7.0},{"n":"MERAK","c":"INDONESIA","lat":-5.93333,"lon":106.0,"tz":7.0},{"n":"MERAUKE","c":"INDONESIA","lat":-8.5,"lon":140.45,"tz":9.0},{"n":"METRO","c":"INDONESIA","lat":-5.11667,"lon":105.26667,"tz":7.0},{"n":"MEULABOH","c":"INDONESIA","lat":4.18333,"lon":96.11667,"tz":7.0},{"n":"MEUREUDEU","c":"INDONESIA","lat":5.25,"lon":96.25,"tz":7.0},{"n":"MOJOKERTO","c":"INDONESIA","lat":-7.46667,"lon":112.43333,"tz":7.0},{"n":"MOROTAI","c":"INDONESIA","lat":2.16667,"lon":128.16667,"tz":8.0},{"n":"MUARA BULIAN","c":"INDONESIA","lat":-1.75,"lon":103.25,"tz":7.0},{"n":"MUARA BUNGO","c":"INDONESIA","lat":-1.5,"lon":102.11667,"tz":7.0},{"n":"MUARA ENIM","c":"INDONESIA","lat":-3.63333,"lon":103.78333,"tz":7.0},{"n":"MUARA LABUH","c":"INDONESIA","lat":-1.48333,"lon":101.03333,"tz":7.0},{"n":"MUARA TEWE","c":"INDONESIA","lat":-0.51667,"lon":114.88333,"tz":8.0},{"n":"MUSI BANYUASIN","c":"INDONESIA","lat":-2.53389,"lon":103.73444,"tz":7.0},{"n":"MUKOMUKO","c":"INDONESIA","lat":-2.55,"lon":101.08333,"tz":9.0},{"n":"NABIRE","c":"INDONESIA","lat":-3.3,"lon":135.55,"tz":9.0},{"n":"NEGARA BALI","c":"INDONESIA","lat":-8.38333,"lon":114.58333,"tz":7.0},{"n":"NEGARA KALSEL","c":"INDONESIA","lat":-2.7,"lon":115.08333,"tz":8.0},{"n":"NGANJUK","c":"INDONESIA","lat":-7.63333,"lon":111.88333,"tz":7.0},{"n":"NGAWI","c":"INDONESIA","lat":-7.43333,"lon":111.43333,"tz":7.0},{"n":"NUNUKAN","c":"INDONESIA","lat":4.1,"lon":117.66667,"tz":8.0},{"n":"PACITAN","c":"INDONESIA","lat":-8.2,"lon":111.1,"tz":7.0},{"n":"PADANG","c":"INDONESIA","lat":-0.95,"lon":100.35,"tz":7.0},{"n":"PADANG PANJANG","c":"INDONESIA","lat":-0.45,"lon":100.38333,"tz":7.0},{"n":"PADANG RATU","c":"INDONESIA","lat":-5.03022,"lon":104.96225,"tz":7.0},{"n":"PADANG SIDAMPUAN","c":"INDONESIA","lat":1.41667,"lon":99.23333,"tz":7.0},{"n":"PADANG SIDEMPUAN","c":"INDONESIA","lat":1.41667,"lon":99.23333,"tz":7.0},{"n":"PAGANTENAN","c":"INDONESIA","lat":-7.03333,"lon":113.55,"tz":7.0},{"n":"PAINAN","c":"INDONESIA","lat":-1.33333,"lon":100.55,"tz":7.0},{"n":"PAKAN BARU","c":"INDONESIA","lat":0.5,"lon":101.46667,"tz":7.0},{"n":"PALANGKARAYA","c":"INDONESIA","lat":-2.26667,"lon":113.93333,"tz":7.0},{"n":"PALEMBANG","c":"INDONESIA","lat":-2.98333,"lon":104.78333,"tz":7.0},{"n":"PALOPO","c":"INDONESIA","lat":-3.01667,"lon":120.21667,"tz":8.0},{"n":"PALU","c":"INDONESIA","lat":-0.83333,"lon":119.9,"tz":8.0},{"n":"PAMANUKAN","c":"INDONESIA","lat":-6.3,"lon":107.83333,"tz":7.0},{"n":"PAMEKASAN","c":"INDONESIA","lat":-7.15,"lon":113.5,"tz":7.0},{"n":"PAMEUNGPEUK","c":"INDONESIA","lat":-7.63333,"lon":107.7,"tz":7.0},{"n":"PANDEGELANG","c":"INDONESIA","lat":-6.31667,"lon":106.1,"tz":7.0},{"n":"PANGKAJENE","c":"INDONESIA","lat":-4.83333,"lon":119.56667,"tz":8.0},{"n":"PANGKAL PINANG","c":"INDONESIA","lat":-2.11667,"lon":106.16667,"tz":7.0},{"n":"PANGKALAN BUN","c":"INDONESIA","lat":-2.66667,"lon":111.75,"tz":8.0},{"n":"PAREPARE","c":"INDONESIA","lat":-4.01667,"lon":119.66667,"tz":8.0},{"n":"PARIAMAN","c":"INDONESIA","lat":-0.61667,"lon":100.11667,"tz":7.0},{"n":"PASIR PANGARAYAN","c":"INDONESIA","lat":0.88333,"lon":100.28333,"tz":7.0},{"n":"PASURUAN","c":"INDONESIA","lat":-7.66667,"lon":112.91667,"tz":7.0},{"n":"PATI","c":"INDONESIA","lat":-6.63333,"lon":111.05,"tz":7.0},{"n":"PAYAKUMBUH","c":"INDONESIA","lat":-0.21667,"lon":100.61667,"tz":7.0},{"n":"PEKALONGAN","c":"INDONESIA","lat":-6.91667,"lon":109.68333,"tz":7.0},{"n":"PEKANBARU","c":"INDONESIA","lat":0.5,"lon":101.46667,"tz":7.0},{"n":"PELABUHAN RATU","c":"INDONESIA","lat":-7.02906,"lon":106.55772,"tz":7.0},{"n":"PEMALANG","c":"INDONESIA","lat":-6.91667,"lon":109.4,"tz":7.0},{"n":"PEMATANG SIANTAR","c":"INDONESIA","lat":2.96667,"lon":99.03333,"tz":7.0},{"n":"PENGALENGAN","c":"INDONESIA","lat":-7.21667,"lon":107.51667,"tz":7.0},{"n":"PESISIR UTARA","c":"INDONESIA","lat":-5.04076,"lon":103.81583,"tz":7.0},{"n":"PINRANG","c":"INDONESIA","lat":-3.78333,"lon":119.66667,"tz":8.0},{"n":"POLEWALI","c":"INDONESIA","lat":-3.41667,"lon":119.36667,"tz":8.0},{"n":"PONCO WARNO","c":"INDONESIA","lat":-5.15694,"lon":104.98083,"tz":7.0},{"n":"PONOROGO","c":"INDONESIA","lat":-7.88333,"lon":111.48333,"tz":7.0},{"n":"PONTIANAK","c":"INDONESIA","lat":-0.08333,"lon":109.36667,"tz":8.0},{"n":"POSO","c":"INDONESIA","lat":-1.4,"lon":120.78333,"tz":8.0},{"n":"PPMI ASSALAAM","c":"INDONESIA","lat":-7.55,"lon":110.76667,"tz":7.0},{"n":"PRINGSEWU","c":"INDONESIA","lat":-5.35611,"lon":104.96472,"tz":7.0},{"n":"PROBOLINGGO","c":"INDONESIA","lat":-7.75,"lon":113.21667,"tz":7.0},{"n":"PUBIAN","c":"INDONESIA","lat":-5.11319,"lon":104.86881,"tz":7.0},{"n":"PUGUNG","c":"INDONESIA","lat":-5.43874,"lon":104.82211,"tz":7.0},{"n":"PUNGGUR","c":"INDONESIA","lat":-5.03306,"lon":105.27806,"tz":7.0},{"n":"PURBALINGGA","c":"INDONESIA","lat":-7.41667,"lon":109.36667,"tz":7.0},{"n":"PURBOLINGGO","c":"INDONESIA","lat":-4.96889,"lon":105.51139,"tz":7.0},{"n":"PURWAKARTA","c":"INDONESIA","lat":-6.6,"lon":107.45,"tz":7.0},{"n":"PURWODADI","c":"INDONESIA","lat":-7.13333,"lon":110.9,"tz":7.0},{"n":"PURWOKERTO","c":"INDONESIA","lat":-7.46667,"lon":109.21667,"tz":7.0},{"n":"PURWOREJO","c":"INDONESIA","lat":-7.46667,"lon":109.43333,"tz":7.0},{"n":"PUTRA RUMBIA","c":"INDONESIA","lat":-4.82466,"lon":105.58261,"tz":7.0},{"n":"PUTUSIBAH","c":"INDONESIA","lat":0.81667,"lon":112.93333,"tz":8.0},{"n":"RABA","c":"INDONESIA","lat":-8.5,"lon":118.75,"tz":8.0},{"n":"RAHA","c":"INDONESIA","lat":-4.83333,"lon":122.75,"tz":8.0},{"n":"RANGKASBITUNG","c":"INDONESIA","lat":-6.36667,"lon":106.21667,"tz":7.0},{"n":"RANTAU","c":"INDONESIA","lat":-2.91667,"lon":115.15,"tz":8.0},{"n":"RANTAU PRAPAT","c":"INDONESIA","lat":2.11667,"lon":99.83333,"tz":7.0},{"n":"REMBANG","c":"INDONESIA","lat":-6.65,"lon":111.48333,"tz":7.0},{"n":"RENGAT","c":"INDONESIA","lat":-0.38333,"lon":102.56667,"tz":7.0},{"n":"RUMBIA","c":"INDONESIA","lat":-4.73333,"lon":105.53333,"tz":7.0},{"n":"RUTENG","c":"INDONESIA","lat":-8.66667,"lon":120.5,"tz":8.0},{"n":"SABANG","c":"INDONESIA","lat":5.9,"lon":95.35,"tz":7.0},{"n":"SALATIGA","c":"INDONESIA","lat":-7.33333,"lon":110.48333,"tz":7.0},{"n":"SAMARINDA","c":"INDONESIA","lat":-0.46667,"lon":117.18333,"tz":8.0},{"n":"SAMBAS","c":"INDONESIA","lat":1.3,"lon":109.3,"tz":8.0},{"n":"SAMPANG","c":"INDONESIA","lat":-7.18333,"lon":113.25,"tz":7.0},{"n":"SAMPIT","c":"INDONESIA","lat":-2.53333,"lon":112.96667,"tz":8.0},{"n":"SANGGAU","c":"INDONESIA","lat":0.13333,"lon":110.71667,"tz":8.0},{"n":"SAWAH LUNTO","c":"INDONESIA","lat":-0.66667,"lon":100.76667,"tz":7.0},{"n":"SEKAMPUNG","c":"INDONESIA","lat":-5.18042,"lon":105.43024,"tz":7.0},{"n":"SEKAMPUNG UDIK","c":"INDONESIA","lat":-5.3,"lon":105.57056,"tz":7.0},{"n":"SEKAYU","c":"INDONESIA","lat":-2.88333,"lon":103.83333,"tz":7.0},{"n":"SELAGAI LINGGA","c":"INDONESIA","lat":-5.11756,"lon":104.68211,"tz":7.0},{"n":"SELAT PANJANG","c":"INDONESIA","lat":1.0,"lon":102.25,"tz":7.0},{"n":"SELONG","c":"INDONESIA","lat":-8.63333,"lon":116.5,"tz":8.0},{"n":"SEMARANG","c":"INDONESIA","lat":-7.0,"lon":110.4,"tz":7.0},{"n":"SENDANG AGUNG","c":"INDONESIA","lat":-5.20395,"lon":104.88049,"tz":7.0},{"n":"SEPULUH","c":"INDONESIA","lat":-6.88333,"lon":113.0,"tz":7.0},{"n":"SEPUTIH BANYAK","c":"INDONESIA","lat":-4.86722,"lon":105.48972,"tz":7.0},{"n":"SEPUTIH MATARAM","c":"INDONESIA","lat":-4.82034,"lon":105.33654,"tz":7.0},{"n":"SEPUTIH RAMAN","c":"INDONESIA","lat":-4.88979,"lon":105.37167,"tz":7.0},{"n":"SEPUTIH SURABAYA","c":"INDONESIA","lat":-4.68292,"lon":105.65298,"tz":7.0},{"n":"SERANG","c":"INDONESIA","lat":-6.13333,"lon":106.15,"tz":7.0},{"n":"SIBOLGA","c":"INDONESIA","lat":1.78333,"lon":98.76667,"tz":7.0},{"n":"SIDENRENG","c":"INDONESIA","lat":-4.0,"lon":119.91667,"tz":8.0},{"n":"SIDIKALANG","c":"INDONESIA","lat":-2.75,"lon":98.33333,"tz":7.0},{"n":"SIDOARJO","c":"INDONESIA","lat":-7.48333,"lon":112.71667,"tz":7.0},{"n":"SIGLI","c":"INDONESIA","lat":5.4,"lon":95.95,"tz":7.0},{"n":"SIJUNJUNG","c":"INDONESIA","lat":-0.68333,"lon":100.96667,"tz":7.0},{"n":"SINABANG","c":"INDONESIA","lat":2.46667,"lon":96.36667,"tz":7.0},{"n":"SINDANG BARANG","c":"INDONESIA","lat":-7.43333,"lon":107.13333,"tz":7.0},{"n":"SINGARAJA","c":"INDONESIA","lat":-8.13333,"lon":115.08333,"tz":7.0},{"n":"SINGKAWANG","c":"INDONESIA","lat":0.86667,"lon":109.0,"tz":8.0},{"n":"SINGKIL","c":"INDONESIA","lat":2.3,"lon":97.75,"tz":7.0},{"n":"SINJAI","c":"INDONESIA","lat":-5.08333,"lon":120.13333,"tz":7.0},{"n":"SINTANG","c":"INDONESIA","lat":0.1,"lon":111.56667,"tz":8.0},{"n":"SITUBONDO","c":"INDONESIA","lat":-7.73333,"lon":114.01667,"tz":7.0},{"n":"SLEMAN","c":"INDONESIA","lat":-7.73333,"lon":114.01667,"tz":7.0},{"n":"SOLO","c":"INDONESIA","lat":-7.58333,"lon":110.8,"tz":7.0},{"n":"SOLOK","c":"INDONESIA","lat":-0.78333,"lon":100.63333,"tz":7.0},{"n":"SORONG","c":"INDONESIA","lat":-0.83333,"lon":131.25,"tz":9.0},{"n":"SRAGEN","c":"INDONESIA","lat":-7.45,"lon":111.01667,"tz":7.0},{"n":"SUBANG","c":"INDONESIA","lat":-6.56667,"lon":107.76667,"tz":7.0},{"n":"SUKABUMI","c":"INDONESIA","lat":-6.91667,"lon":106.43333,"tz":7.0},{"n":"SUKADANA","c":"INDONESIA","lat":-5.0,"lon":105.6,"tz":7.0},{"n":"SUKOHARJO","c":"INDONESIA","lat":-7.7,"lon":110.83333,"tz":7.0},{"n":"SULIKI","c":"INDONESIA","lat":-0.1,"lon":100.45,"tz":8.0},{"n":"SUMBAWA BESAR","c":"INDONESIA","lat":-8.5,"lon":117.41667,"tz":8.0},{"n":"SUMBER JAYA","c":"INDONESIA","lat":-4.15861,"lon":104.46056,"tz":7.0},{"n":"SUMEDANG","c":"INDONESIA","lat":-6.88333,"lon":107.88333,"tz":7.0},{"n":"SUMENEP","c":"INDONESIA","lat":-7.05,"lon":113.88333,"tz":7.0},{"n":"SUNBGU MINASA","c":"INDONESIA","lat":-5.2,"lon":119.5,"tz":8.0},{"n":"SUNGAI LIAT","c":"INDONESIA","lat":-1.86667,"lon":106.08333,"tz":7.0},{"n":"SUNGAI PENUH","c":"INDONESIA","lat":-2.06667,"lon":101.4,"tz":7.0},{"n":"SURABAYA","c":"INDONESIA","lat":-7.25,"lon":112.75,"tz":7.0},{"n":"SURAKARTA","c":"INDONESIA","lat":-7.53333,"lon":110.83333,"tz":7.0},{"n":"TABANAN","c":"INDONESIA","lat":-8.48333,"lon":115.03333,"tz":7.0},{"n":"TAHUNA","c":"INDONESIA","lat":3.6,"lon":125.5,"tz":8.0},{"n":"TAKALAR","c":"INDONESIA","lat":-5.5,"lon":119.41667,"tz":8.0},{"n":"TAKENGEUN","c":"INDONESIA","lat":4.71667,"lon":96.83333,"tz":7.0},{"n":"TAKENGON","c":"INDONESIA","lat":4.6,"lon":96.81667,"tz":7.0},{"n":"TALU","c":"INDONESIA","lat":0.21667,"lon":99.96667,"tz":7.0},{"n":"TAMBELANGAN","c":"INDONESIA","lat":-7.08333,"lon":113.2,"tz":7.0},{"n":"TANAH GROGOT","c":"INDONESIA","lat":-1.86667,"lon":116.21667,"tz":8.0},{"n":"TANGERANG","c":"INDONESIA","lat":-6.2,"lon":106.63333,"tz":7.0},{"n":"TANGGAMUS","c":"INDONESIA","lat":-5.29583,"lon":104.75278,"tz":7.0},{"n":"TANJUNG BALAI","c":"INDONESIA","lat":2.98333,"lon":99.78333,"tz":7.0},{"n":"TANJUNG KALSEL","c":"INDONESIA","lat":-2.13333,"lon":115.43333,"tz":8.0},{"n":"TANJUNG KARANG","c":"INDONESIA","lat":-5.41667,"lon":105.28333,"tz":7.0},{"n":"TANJUNG KODOK","c":"INDONESIA","lat":-6.86395,"lon":112.35772,"tz":7.0},{"n":"TANJUNG PANDAN","c":"INDONESIA","lat":-2.75,"lon":107.66667,"tz":7.0},{"n":"TANJUNG PINANG","c":"INDONESIA","lat":0.91667,"lon":104.48333,"tz":7.0},{"n":"TANJUNG PRIOK","c":"INDONESIA","lat":-6.1,"lon":106.81667,"tz":7.0},{"n":"TANJUNG REDEP","c":"INDONESIA","lat":2.13333,"lon":117.46667,"tz":8.0},{"n":"TANJUNG SELOR","c":"INDONESIA","lat":2.76667,"lon":117.36667,"tz":8.0},{"n":"TAPAK TUAN","c":"INDONESIA","lat":3.3,"lon":97.16667,"tz":7.0},{"n":"TARUTUNG","c":"INDONESIA","lat":2.0,"lon":98.95,"tz":7.0},{"n":"TASIKMALAYA","c":"INDONESIA","lat":-7.45,"lon":108.21667,"tz":7.0},{"n":"TEBING TINGGI","c":"INDONESIA","lat":3.36667,"lon":99.11667,"tz":7.0},{"n":"TEGAL","c":"INDONESIA","lat":-6.9,"lon":109.13333,"tz":7.0},{"n":"TELUK BETUNG","c":"INDONESIA","lat":-5.41667,"lon":105.28333,"tz":7.0},{"n":"TEMANGGUNG","c":"INDONESIA","lat":-7.36667,"lon":110.13333,"tz":7.0},{"n":"TEMBILAHAN","c":"INDONESIA","lat":-0.31667,"lon":103.11667,"tz":7.0},{"n":"TERNATE","c":"INDONESIA","lat":1.81667,"lon":127.4,"tz":9.0},{"n":"TERBANGGI BESAR","c":"INDONESIA","lat":-4.88274,"lon":105.217,"tz":7.0},{"n":"TERUSAN NUNYAI","c":"INDONESIA","lat":-4.70217,"lon":105.24289,"tz":7.0},{"n":"TEST","c":"INDONESIA","lat":-7.11667,"lon":110.66667,"tz":7.0},{"n":"TOBELO","c":"INDONESIA","lat":1.75,"lon":128.0,"tz":9.0},{"n":"TOLITOLI","c":"INDONESIA","lat":1.05,"lon":120.83333,"tz":8.0},{"n":"TORJUN","c":"INDONESIA","lat":-7.15,"lon":113.25,"tz":7.0},{"n":"TRENGGALEK","c":"INDONESIA","lat":-8.06667,"lon":111.73333,"tz":7.0},{"n":"TRIMURJO","c":"INDONESIA","lat":-5.11407,"lon":105.25459,"tz":7.0},{"n":"TUBAN","c":"INDONESIA","lat":-6.93333,"lon":112.06667,"tz":7.0},{"n":"TULUNGAGUNG","c":"INDONESIA","lat":-8.08333,"lon":111.9,"tz":7.0},{"n":"UJUNG KULON","c":"INDONESIA","lat":-6.75,"lon":105.33333,"tz":7.0},{"n":"UJUNG PANDAN","c":"INDONESIA","lat":-5.13333,"lon":119.45,"tz":8.0},{"n":"UJUNG PANGKAH","c":"INDONESIA","lat":-6.9,"lon":112.6,"tz":7.0},{"n":"UJUNG PANGKAH","c":"INDONESIA","lat":-6.91151,"lon":112.53121,"tz":7.0},{"n":"UJUNG_PANDANG","c":"INDONESIA","lat":-5.15,"lon":119.46667,"tz":8.0},{"n":"MAKASAR","c":"INDONESIA","lat":-5.15,"lon":119.46667,"tz":8.0},{"n":"WAIKABUBAK","c":"INDONESIA","lat":-9.66667,"lon":119.41667,"tz":8.0},{"n":"WAINGAPU","c":"INDONESIA","lat":-9.66667,"lon":120.25,"tz":9.0},{"n":"WAMENA","c":"INDONESIA","lat":-3.9,"lon":138.68333,"tz":9.0},{"n":"WARU","c":"INDONESIA","lat":-6.93333,"lon":113.61667,"tz":7.0},{"n":"WATANPONE","c":"INDONESIA","lat":-4.56667,"lon":120.33333,"tz":8.0},{"n":"WATANSOPPENG","c":"INDONESIA","lat":-4.35,"lon":119.91667,"tz":8.0},{"n":"WATES","c":"INDONESIA","lat":-7.86667,"lon":110.13333,"tz":7.0},{"n":"WAY PENGUBUAN","c":"INDONESIA","lat":-4.86586,"lon":105.10258,"tz":7.0},{"n":"WAY SEPUTIH","c":"INDONESIA","lat":-4.80842,"lon":105.41852,"tz":7.0},{"n":"WONOGIRI","c":"INDONESIA","lat":-7.83333,"lon":110.91667,"tz":7.0},{"n":"WONOSARI","c":"INDONESIA","lat":-7.96667,"lon":110.58333,"tz":7.0},{"n":"WONOSOBO","c":"INDONESIA","lat":-7.4,"lon":109.9,"tz":7.0},{"n":"YOGYAKARTA","c":"INDONESIA","lat":-7.8,"lon":110.4,"tz":7.0}];
+
+/* ================= ASTRO CORE (algoritma Jean Meeus, "Astronomical Algorithms") ================= */
+const KAABA_LAT = 21.4225, KAABA_LON = 39.8262;
+function rad(d){return d*Math.PI/180;}
+function deg(r){return r*180/Math.PI;}
+function norm360(d){ d = d % 360; if(d<0) d+=360; return d;}
+function jd(y,m,d,h){
+  if(m<=2){y-=1;m+=12;}
+  const A = Math.floor(y/100);
+  const B = 2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(m+1)) + d + h/24 + B - 1524.5;
+}
+function fromJD(JD){
+  JD += 0.5;
+  const Z = Math.floor(JD), F = JD - Z;
+  let A = Z;
+  if(Z>=2299161){ const al = Math.floor((Z-1867216.25)/36524.25); A = Z + 1 + al - Math.floor(al/4); }
+  const B = A + 1524, C = Math.floor((B-122.1)/365.25), D = Math.floor(365.25*C), E = Math.floor((B-D)/30.6001);
+  const day = B - D - Math.floor(30.6001*E) + F;
+  const month = (E<14) ? E-1 : E-13;
+  const year = (month>2) ? C-4716 : C-4715;
+  const d = Math.floor(day);
+  const hfrac = (day-d)*24;
+  return {y:year, m:month, d:d, h:hfrac};
+}
+function deltaT(y){ const t=y-2000; if(y>=2005&&y<=2050){ return (62.92+0.32217*t+0.005589*t*t)/86400; } return (63+0.3932*t)/86400; }
+function gmst(JD){
+  const T=(JD-2451545.0)/36525;
+  let g=280.46061837+360.98564736629*(JD-2451545.0)+0.000387933*T*T-T*T*T/38710000;
+  return norm360(g);
+}
+function sunPos(T){
+  const L0=norm360(280.46646+36000.76983*T+0.0003032*T*T);
+  const M=norm360(357.52911+35999.05029*T-0.0001537*T*T);
+  const e=0.016708634-0.000042037*T-0.0000001267*T*T;
+  const Mr=rad(M);
+  const C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
+  const trueLon=L0+C, trueAnom=M+C;
+  const R=1.000001018*(1-e*e)/(1+e*Math.cos(rad(trueAnom)));
+  const Omega=125.04-1934.136*T;
+  const appLon=trueLon-0.00569-0.00478*Math.sin(rad(Omega));
+  const eps0=23+26/60+21.448/3600-(46.8150*T+0.00059*T*T-0.001813*T*T*T)/3600;
+  const eps=eps0+0.00256*Math.cos(rad(Omega));
+  const RA=norm360(deg(Math.atan2(Math.cos(rad(eps))*Math.sin(rad(appLon)),Math.cos(rad(appLon)))));
+  const Dec=deg(Math.asin(Math.sin(rad(eps))*Math.sin(rad(appLon))));
+  const y2=Math.pow(Math.tan(rad(eps0/2)),2);
+  const L0r=rad(L0), Mr2=rad(M);
+  const E=y2*Math.sin(2*L0r)-2*e*Math.sin(Mr2)+4*e*y2*Math.sin(Mr2)*Math.cos(2*L0r)-0.5*y2*y2*Math.sin(4*L0r)-1.25*e*e*Math.sin(2*Mr2);
+  const eot=deg(E)*4;
+  return {L0,M,e,C,trueLon,appLon,R,eps,eps0,RA,Dec,eot};
+}
+function moonPos(T){
+  const Lp=norm360(218.3164477+481267.88123421*T-0.0015786*T*T+T*T*T/538841-T*T*T*T/65194000);
+  const D=norm360(297.8501921+445267.1114034*T-0.0018819*T*T+T*T*T/545868-T*T*T*T/113065000);
+  const M=norm360(357.5291092+35999.0502909*T-0.0001536*T*T+T*T*T/24490000);
+  const Mp=norm360(134.9633964+477198.8675055*T+0.0087414*T*T+T*T*T/69699-T*T*T*T/14712000);
+  const F=norm360(93.2720950+483202.0175233*T-0.0036539*T*T-T*T*T/3526000+T*T*T*T/863310000);
+  const E=1-0.002516*T-0.0000074*T*T;
+  const A1=norm360(119.75+131.849*T), A2=norm360(53.09+479264.290*T), A3=norm360(313.45+481266.484*T);
+  const d=rad(D), m=rad(M), mp=rad(Mp), f=rad(F);
+  let sl=6.288774*Math.sin(mp)+1.274027*Math.sin(2*d-mp)+0.658314*Math.sin(2*d)+0.213618*Math.sin(2*mp)
+    -0.185116*E*Math.sin(m)-0.114332*Math.sin(2*f)+0.058793*Math.sin(2*d-2*mp)+0.057066*E*Math.sin(2*d-m-mp)
+    +0.053322*Math.sin(2*d+mp)+0.045758*E*Math.sin(2*d-m)-0.040923*E*Math.sin(m-mp)-0.034720*Math.sin(d)
+    -0.030383*E*Math.sin(m+mp)+0.015327*Math.sin(2*d-2*f)-0.012528*Math.sin(mp+2*f)+0.010980*Math.sin(mp-2*f)
+    +0.010675*Math.sin(4*d-mp)+0.010034*Math.sin(3*mp)+0.008548*Math.sin(4*d-2*mp)-0.007888*E*Math.sin(2*d+m-mp)
+    -0.006766*E*Math.sin(2*d+m)-0.005163*Math.sin(d-mp)+0.004987*E*Math.sin(d+m)+0.004036*E*Math.sin(2*d-m+mp)
+    +0.003994*E*Math.sin(2*d+2*mp)+0.003861*Math.sin(4*d)+0.003665*Math.sin(2*d-3*mp)+0.002695*E*Math.sin(2*mp-m)
+    +0.002602*Math.sin(mp-2*f-2*d)+0.002396*E*Math.sin(2*d-m-2*mp)-0.002349*Math.sin(mp+d)
+    +0.002249*E*E*Math.sin(2*d-2*m)-0.002125*E*Math.sin(2*mp+m)-0.002079*E*E*Math.sin(2*m)
+    +0.002059*E*E*Math.sin(2*d-m-2*mp)-0.001773*Math.sin(mp+2*d-2*f)-0.001595*Math.sin(2*f+d)
+    +0.001220*E*Math.sin(4*d-m-mp)-0.001110*Math.sin(2*mp+2*f)+0.000892*Math.sin(mp-3*d)
+    -0.000811*E*Math.sin(mp+m+2*d)+0.000761*E*Math.sin(4*d-m-2*mp)+0.000717*E*Math.sin(mp-2*m)
+    +0.000704*E*E*Math.sin(mp-2*m-2*d)+0.000693*E*Math.sin(m-2*mp+2*d)+0.000598*E*Math.sin(2*d-m-2*f)
+    +0.000550*Math.sin(mp+4*d)+0.000538*Math.sin(4*mp)+0.000521*E*Math.sin(4*d-m)+0.000486*Math.sin(2*mp-d);
+  sl=sl+0.003958*Math.sin(rad(A1))+0.001962*Math.sin(rad(Lp-F))+0.000318*Math.sin(rad(A2));
+  let sb=5.128122*Math.sin(f)+0.280602*Math.sin(mp+f)+0.277693*Math.sin(mp-f)+0.173237*Math.sin(2*d-f)
+    +0.055413*Math.sin(2*d+f-mp)+0.046271*Math.sin(2*d-f-mp)+0.032573*Math.sin(2*d+f)+0.017198*Math.sin(2*mp+f)
+    +0.009266*Math.sin(2*d+mp-f)+0.008822*Math.sin(2*mp-f)+0.008216*E*Math.sin(2*d-m-f)+0.004324*Math.sin(2*d-2*mp-f)
+    +0.004200*Math.sin(2*d+f+mp)-0.003359*E*Math.sin(2*d+f-m)+0.002463*E*Math.sin(2*d-m-mp+f)
+    +0.002211*E*Math.sin(2*d-m+f)+0.002065*E*Math.sin(2*d-m-mp-f)-0.001870*E*Math.sin(m-mp-f)
+    +0.001828*Math.sin(4*d-mp-f)-0.001794*E*Math.sin(m+f)-0.001749*Math.sin(3*f)-0.001565*E*Math.sin(m-mp+f)
+    -0.001491*Math.sin(d+f)-0.001475*E*Math.sin(m+mp+f)-0.001410*E*Math.sin(m+mp-f)-0.001344*E*Math.sin(m-f)
+    -0.001335*Math.sin(d-f)+0.001107*Math.sin(3*mp+f)+0.001021*Math.sin(4*d-f)+0.000833*Math.sin(4*d-mp+f);
+  sb=sb-0.002235*Math.sin(rad(Lp))+0.000382*Math.sin(rad(A3))+0.000175*Math.sin(rad(A1-F))+0.000175*Math.sin(rad(A1+F))+0.000127*Math.sin(rad(Lp-mp))-0.000115*Math.sin(rad(Lp+mp));
+  let sr=-20905.355*Math.cos(mp)-3699.111*Math.cos(2*d-mp)-2955.968*Math.cos(2*d)-569.925*Math.cos(2*mp)
+    +48.888*E*Math.cos(m)-3.149*Math.cos(2*f)+246.158*Math.cos(2*d-2*mp)-152.138*E*Math.cos(2*d-m-mp)
+    -170.733*Math.cos(2*d+mp)-204.586*E*Math.cos(2*d-m)-129.620*E*Math.cos(m-mp)+108.743*Math.cos(d)
+    +104.755*E*Math.cos(m+mp)+10.321*Math.cos(2*d-2*f)+79.661*Math.cos(mp-2*f)-34.782*Math.cos(4*d-mp)
+    -23.210*Math.cos(3*mp)-21.636*Math.cos(4*d-2*mp)+24.208*E*Math.cos(2*d+m-mp)+30.824*E*Math.cos(2*d+m)
+    -8.379*Math.cos(d-mp)-16.675*E*Math.cos(d+m)-12.831*E*Math.cos(2*d-m+mp)-10.445*Math.cos(2*d+2*mp)
+    -11.650*Math.cos(4*d)+14.403*Math.cos(4*d-3*mp)-7.003*E*Math.cos(2*mp-m)+10.056*E*Math.cos(2*d-m-2*mp)
+    +6.322*Math.cos(mp+d)-9.884*E*E*Math.cos(2*d-2*m)+5.751*E*Math.cos(m+2*mp)-4.950*E*E*Math.cos(2*d-2*m)
+    +4.130*Math.cos(2*d+mp-2*f)-3.958*Math.cos(4*d-m-mp)+3.258*Math.cos(3*d-mp)+2.616*Math.cos(2*d+2*mp-m)
+    -1.897*Math.cos(mp-2*d-2*f);
+  const lon=norm360(Lp+sl), lat=sb, dist=385000.56+sr;
+  return {Lp,D,M,Mp,F,lon,lat,dist};
+}
+function eclToEqu(lon,lat,eps){
+  const l=rad(lon), b=rad(lat), e=rad(eps);
+  const RA=norm360(deg(Math.atan2(Math.sin(l)*Math.cos(e)-Math.tan(b)*Math.sin(e),Math.cos(l))));
+  const Dec=deg(Math.asin(Math.sin(b)*Math.cos(e)+Math.cos(b)*Math.sin(e)*Math.sin(l)));
+  return {RA,Dec};
+}
+function horizontal(RA,Dec,lat,lon,JD_UT){
+  const gst=gmst(JD_UT), lst=norm360(gst+lon);
+  const H=norm360(lst-RA);
+  const Hr=rad(H), latr=rad(lat), decr=rad(Dec);
+  const alt=deg(Math.asin(Math.sin(latr)*Math.sin(decr)+Math.cos(latr)*Math.cos(decr)*Math.cos(Hr)));
+  let az=deg(Math.atan2(Math.sin(Hr),Math.cos(Hr)*Math.sin(latr)-Math.tan(decr)*Math.cos(latr)));
+  az=norm360(az+180);
+  return {alt,az,H};
+}
+function topocentricMoon(RA,Dec,lat,lon,JD,distKm){
+  const Re=6378.14;
+  const pie=deg(Math.asin(Re/distKm));
+  const gst=gmst(JD), lst=norm360(gst+lon), H=norm360(lst-RA);
+  const Hr=rad(H), latr=rad(lat), decr=rad(Dec), pier=rad(pie);
+  const dAlpha=Math.atan2(-Math.cos(latr)*Math.sin(pier)*Math.sin(Hr), Math.cos(decr)-Math.cos(latr)*Math.sin(pier)*Math.cos(Hr));
+  const decTopo=Math.atan2((Math.sin(decr)-Math.sin(latr)*Math.sin(pier))*Math.cos(dAlpha), Math.cos(decr)-Math.cos(latr)*Math.sin(pier)*Math.cos(Hr));
+  return {RA:RA+deg(dAlpha), Dec:deg(decTopo)};
+}
+function refraction(altApp){ // empirical, deg -> deg correction (Meeus 16.4, extended)
+  if(altApp < -2) altApp = -2;
+  const R = 1.02/Math.tan(rad(altApp+10.3/(altApp+5.11)))/60; // degrees
+  return R;
+}
+// sun/moon full topocentric altitude & azimuth at given JD(UT) & location
+function sunTopo(JD, lat, lon){
+  const T=(JD-2451545.0)/36525;
+  const s=sunPos(T);
+  const eq=eclToEqu(s.appLon,0,s.eps);
+  const h=horizontal(eq.RA,eq.Dec,lat,lon,JD);
+  return {...h, sun:s, RA:eq.RA, Dec:eq.Dec};
+}
+function moonTopo(JD, lat, lon){
+  const T=(JD-2451545.0)/36525;
+  const s=sunPos(T);
+  const m=moonPos(T);
+  const eq=eclToEqu(m.lon,m.lat,s.eps);
+  const topo=topocentricMoon(eq.RA,eq.Dec,lat,lon,JD,m.dist);
+  const h=horizontal(topo.RA,topo.Dec,lat,lon,JD);
+  return {...h, moon:m, RA:topo.RA, Dec:topo.Dec};
+}
+
+/* ---- New Moon (conjunction) finder, Meeus ch.49 ---- */
+function newMoonJDE(k){
+  const T=k/1236.85;
+  const JDE0=2451550.09766+29.530588861*k+0.00015437*T*T-0.000000150*T*T*T+0.00000000073*T*T*T*T;
+  const E=1-0.002516*T-0.0000074*T*T;
+  const Msun=norm360(2.5534+29.10535670*k-0.0000014*T*T-0.00000011*T*T*T);
+  const Mmoon=norm360(201.5643+385.81693528*k+0.0107582*T*T+0.00001238*T*T*T-0.000000058*T*T*T*T);
+  const F=norm360(160.7108+390.67050284*k-0.0016118*T*T-0.00000227*T*T*T+0.000000011*T*T*T*T);
+  const Omega=norm360(124.7746-1.56375588*k+0.0020672*T*T+0.00000215*T*T*T);
+  const Ms=rad(Msun), Mm=rad(Mmoon), Fr=rad(F);
+  let corr=-0.40720*Math.sin(Mm)+0.17241*E*Math.sin(Ms)+0.01608*Math.sin(2*Mm)+0.01039*Math.sin(2*Fr)
+    +0.00739*E*Math.sin(Mm-Ms)-0.00514*E*Math.sin(Mm+Ms)+0.00208*E*E*Math.sin(2*Ms)-0.00111*Math.sin(Mm-2*Fr)
+    -0.00057*Math.sin(Mm+2*Fr)+0.00056*E*Math.sin(2*Mm+Ms)-0.00042*Math.sin(3*Mm)+0.00042*E*Math.sin(Ms+2*Fr)
+    +0.00038*E*Math.sin(Ms-2*Fr)-0.00024*E*Math.sin(2*Mm-Ms)-0.00017*Math.sin(rad(Omega))-0.00007*Math.sin(Mm+2*Ms)
+    +0.00004*Math.sin(2*Mm-2*Fr)+0.00004*Math.sin(3*Ms)+0.00003*Math.sin(Mm+Ms-2*Fr)+0.00003*Math.sin(2*Mm+2*Fr)
+    -0.00003*Math.sin(Mm+Ms+2*Fr)+0.00003*Math.sin(Mm-Ms+2*Fr)-0.00002*Math.sin(Mm-Ms-2*Fr)-0.00002*Math.sin(3*Mm+Ms)+0.00002*Math.sin(4*Mm);
+  const JDE = JDE0+corr;
+  return JDE - deltaT(fromJD(JDE).y); // convert TD -> UT
+}
+function fullMoonJDE(k){ return newMoonJDE(k+0.5); }
+// k index approx for a given decimal year (2000.0 = k0)
+function kApprox(decYear){ return (decYear-2000)*12.3685; }
+
+/* ---- Moon phase / illumination ---- */
+function moonPhaseInfo(JD_UT){
+  const T=(JD_UT-2451545.0)/36525;
+  const s=sunPos(T), m=moonPos(T);
+  let elong=norm360(m.lon-s.appLon);
+  const phaseAngle = 180 - elong <= 180 ? Math.abs(180-elong): 360-Math.abs(180-elong);
+  const D = elong; // simple elongation-based
+  const illum = (1+Math.cos(rad(180-D)))/2;
+  let name;
+  if(D<1||D>359) name='Bulan Baru (New Moon)';
+  else if(D<90) name='Sabit Awal (Waxing Crescent)';
+  else if(D<91) name='Kuartal Pertama';
+  else if(D<180) name='Cembung Awal (Waxing Gibbous)';
+  else if(D<181) name='Purnama (Full Moon)';
+  else if(D<270) name='Cembung Akhir (Waning Gibbous)';
+  else if(D<271) name='Kuartal Akhir';
+  else name='Sabit Akhir (Waning Crescent)';
+  return {elong:D, illum, name};
+}
+
+/* ---- Qibla ---- */
+function qiblaAzimuth(lat,lon){
+  const phi1=rad(lat), phi2=rad(KAABA_LAT), dl=rad(KAABA_LON-lon);
+  const yv=Math.sin(dl), xv=Math.cos(phi1)*Math.tan(phi2)-Math.sin(phi1)*Math.cos(dl);
+  return norm360(deg(Math.atan2(yv,xv)));
+}
+function greatCircleDist(lat1,lon1,lat2,lon2){
+  const phi1=rad(lat1), phi2=rad(lat2), dphi=rad(lat2-lat1), dl=rad(lon2-lon1);
+  const a=Math.sin(dphi/2)**2+Math.cos(phi1)*Math.cos(phi2)*Math.sin(dl/2)**2;
+  return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+/* ---- Sun-angle time solver (for prayer times) ---- */
+// returns local clock hour (decimal) for given target altitude (deg), morning=true for before-noon event
+function sunTimeForAltitude(y,m,d,lat,lon,tz,altDeg,morning){
+  const JD0=jd(y,m,d,0)-tz/24; // midnight local in UT terms baseline (approx date)
+  const T=(jd(y,m,d,12-tz)-2451545.0)/36525;
+  const s=sunPos(T);
+  const decR=rad(s.Dec), latR=rad(lat);
+  const cosH=(Math.sin(rad(altDeg))-Math.sin(latR)*Math.sin(decR))/(Math.cos(latR)*Math.cos(decR));
+  if(cosH>1||cosH<-1) return null; // sun never reaches this altitude
+  const H=deg(Math.acos(cosH));
+  const noon = 12 + tz - lon/15 - s.eot/60;
+  return morning ? noon - H/15 : noon + H/15;
+}
+function sunTransitLocal(y,m,d,lon,tz){
+  const T=(jd(y,m,d,12-tz)-2451545.0)/36525;
+  const s=sunPos(T);
+  return 12 + tz - lon/15 - s.eot/60;
+}
+function asrAltitude(lat,dec,shadowFactor){
+  const t = shadowFactor + Math.abs(Math.tan(rad(lat-dec)));
+  return deg(Math.atan(1/t));
+}
+function hToHM(hDec){
+  if(hDec===null||isNaN(hDec)) return '—';
+  hDec = ((hDec%24)+24)%24;
+  let h=Math.floor(hDec), mnt=Math.round((hDec-h)*60);
+  if(mnt===60){mnt=0;h+=1;}
+  if(h>=24) h-=24;
+  return String(h).padStart(2,'0')+':'+String(mnt).padStart(2,'0');
+}
+
+/* ---- DMS formatting ---- */
+function toDMS(decDeg){
+  const sign = decDeg<0?-1:1; decDeg=Math.abs(decDeg);
+  const d=Math.floor(decDeg); const mFull=(decDeg-d)*60; const m=Math.floor(mFull); const s=((mFull-m)*60);
+  return {sign,d,m,s};
+}
+function dmsStr(decDeg,posLabel,negLabel){
+  const o = toDMS(decDeg);
+  return `${String(o.d).padStart(2,'0')}° ${String(o.m).padStart(2,'0')}' ${o.s.toFixed(1)}" ${o.sign<0?negLabel:posLabel}`;
+}
+
+/* ================= HIJRI ENGINE (hisab hakiki wujudul-hilal berbasis konjungsi nyata) ================= */
+const HIJRI_MONTHS = ['Muharram',"Shafar","Rabi'ul Awwal","Rabi'ul Akhir","Jumadil Awwal","Jumadil Akhir","Rajab","Sya'ban","Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"];
+const DOW_ID = ['Ahad','Senin','Selasa','Rabu','Kamis',"Jum'at",'Sabtu'];
+const PASARAN = ['Legi','Pahing','Pon','Wage','Kliwon'];
+const PASARAN_ANCHOR_JD = jd(2026,2,19,12); // = Kamis Pahing (terverifikasi hisab)
+const PASARAN_ANCHOR_IDX = 1;
+function dowName(y,m,d){ return DOW_ID[new Date(Date.UTC(y,m-1,d)).getUTCDay()]; }
+function pasaranName(y,m,d){
+  const j = Math.floor(jd(y,m,d,12));
+  let idx = ((j - PASARAN_ANCHOR_JD) % 5 + 5 + PASARAN_ANCHOR_IDX) % 5;
+  return PASARAN[idx];
+}
+function addDays(y,m,d,n){ const f=fromJD(jd(y,m,d,12)+n); return {y:f.y,m:f.m,d:Math.round(f.d)}; }
+function dipCorr(elevM){ return 0.0293*Math.sqrt(Math.max(0,elevM||0)); }
+
+// Anchor lunation: k=323 -> ijtimak awal Ramadhan 1447H (17 Feb 2026), start 19-2-2026
+const ANCHOR_K = 323, ANCHOR_HY = 1447, ANCHOR_HM = 9; // Ramadhan
+
+// evaluate hilal condition at a given evening's maghrib for a location; returns detail object
+function evalHilalEvening(y,m,d, lat,lon,tz,elevM){
+  const dip = dipCorr(elevM);
+  const maghribH = sunTimeForAltitude(y,m,d,lat,lon,tz,-(0.8333+dip),false);
+  if(maghribH===null) return null;
+  const JD_UT = jd(y,m,d, maghribH) - tz/24;
+  const sT = sunTopo(JD_UT,lat,lon);
+  const mT = moonTopo(JD_UT,lat,lon);
+  let elong = deg(Math.acos(Math.max(-1,Math.min(1,
+    Math.sin(rad(sT.Dec))*Math.sin(rad(mT.Dec)) + Math.cos(rad(sT.Dec))*Math.cos(rad(mT.Dec))*Math.cos(rad(sT.RA-mT.RA))
+  ))));
+  const altHakiki = mT.alt; // topocentric true altitude (no refraction)
+  const R = refraction(altHakiki);
+  const altMari = altHakiki + R;
+  let dAz = mT.az - sT.az;
+  return {maghribH, altHakiki, altMari, elong, azSun:sT.az, azMoon:mT.az, dAz};
+}
+// find ijtimak local reference evening date for a given k, at chosen location
+function refEveningForK(k, lat,lon,tz,elevM){
+  const ijUT = newMoonJDE(k);
+  const ijLocalJD = ijUT + tz/24;
+  const ijCal = fromJD(ijLocalJD);
+  const Dc = {y:ijCal.y, m:ijCal.m, d:Math.floor(ijCal.d)};
+  const ijHour = ijCal.h;
+  const dip = dipCorr(elevM);
+  const maghribDc = sunTimeForAltitude(Dc.y,Dc.m,Dc.d,lat,lon,tz,-(0.8333+dip),false);
+  let ref;
+  if(maghribDc!==null && ijHour < maghribDc) ref = Dc;
+  else ref = addDays(Dc.y,Dc.m,Dc.d,1);
+  return {ijUT, ijLocalJD, ijCal, ref};
+}
+// full awal-bulan computation for lunation k, returns per-criteria conclusion + raw data
+function computeAwalBulan(k, lat,lon,tz,elevM,locName){
+  const {ijUT, ref} = refEveningForK(k,lat,lon,tz,elevM);
+  const ev = evalHilalEvening(ref.y,ref.m,ref.d, lat,lon,tz,elevM);
+  const ev1 = evalHilalEvening(...Object.values(addDays(ref.y,ref.m,ref.d,1)), lat,lon,tz,elevM);
+  const ev2 = evalHilalEvening(...Object.values(addDays(ref.y,ref.m,ref.d,2)), lat,lon,tz,elevM);
+  const criteria = [
+    {key:'wujudul', label:"Wujudul Hilal (Muhammadiyah)", test:(e)=> e.altHakiki > 0},
+    {key:'mabims2011', label:"Imkan Rukyah 2° (MABIMS lama / NU-Kemenag)", test:(e)=> e.altHakiki >= 2 && e.elong >= 3},
+    {key:'mabims2021', label:"MABIMS 2021 — Tinggi ≥3°, Elongasi ≥6.4° (Kemenag RI saat ini)", test:(e)=> e.altHakiki >= 3 && e.elong >= 6.4},
+    {key:'persis', label:"Imkan Rukyah beda tinggi 4° (Persis)", test:(e)=> e.altHakiki >= 4},
+  ];
+  const results = criteria.map(c=>{
+    const met = ev ? c.test(ev) : false;
+    const startDate = met ? addDays(ref.y,ref.m,ref.d,1) : addDays(ref.y,ref.m,ref.d,2);
+    const prevMonthDays = met ? 29 : 30;
+    return {...c, met, startDate, prevMonthDays};
+  });
+  return {ijUT, ref, ev, ev1, ev2, results};
+}
+// derive hijri year/month for a lunation offset from anchor
+function hijriYM(kOffsetFromAnchor){
+  let hm = ANCHOR_HM + kOffsetFromAnchor;
+  let hy = ANCHOR_HY;
+  while(hm>12){hm-=12; hy++;}
+  while(hm<1){hm+=12; hy--;}
+  return {hy,hm};
+}
+// find k for a specific target hijri year/month
+function kForHijriYM(hy,hm){
+  const totalAnchor = ANCHOR_HY*12+ANCHOR_HM;
+  const totalTarget = hy*12+hm;
+  return ANCHOR_K + (totalTarget-totalAnchor);
+}
+// cache month-start dates (using MABIMS2021 as default calendar criteria) keyed by "hy-hm"
+const monthStartCache = {};
+function getMonthStart(hy,hm, lat,lon,tz,elevM, criteriaKey){
+  criteriaKey = criteriaKey||'mabims2021';
+  const key = hy+'-'+hm+'-'+criteriaKey+'-'+lat.toFixed(2)+'-'+lon.toFixed(2)+'-'+tz;
+  if(monthStartCache[key]) return monthStartCache[key];
+  const k = kForHijriYM(hy,hm);
+  const res = computeAwalBulan(k,lat,lon,tz,elevM);
+  const r = res.results.find(x=>x.key===criteriaKey) || res.results[2];
+  monthStartCache[key] = r.startDate;
+  return r.startDate;
+}
+function hijriMonthLength(hy,hm, lat,lon,tz,elevM, criteriaKey){
+  const start = getMonthStart(hy,hm,lat,lon,tz,elevM,criteriaKey);
+  let nhy=hy,nhm=hm+1; if(nhm>12){nhm=1;nhy++;}
+  const nstart = getMonthStart(nhy,nhm,lat,lon,tz,elevM,criteriaKey);
+  const jd1 = jd(start.y,start.m,start.d,0), jd2=jd(nstart.y,nstart.m,nstart.d,0);
+  return Math.round(jd2-jd1);
+}
+// convert a Gregorian date -> Hijri date (search nearby months) using given criteria & location
+function gregorianToHijri(y,m,d, lat,lon,tz,elevM, criteriaKey){
+  // estimate hijri year/month roughly then refine
+  const jdTarget = jd(y,m,d,12);
+  let hy = Math.round((y-622)*1.030684);
+  let hm = 1;
+  // start search from an estimate a bit earlier, walk forward
+  let guessK = ANCHOR_K + Math.round((jdTarget - jd(2026,2,19,12))/29.53);
+  let ym = hijriYM(guessK-ANCHOR_K);
+  // walk to find bracket where start<=target<nextstart
+  for(let iter=0; iter<36; iter++){
+    const s = getMonthStart(ym.hy,ym.hm,lat,lon,tz,elevM,criteriaKey);
+    const sJD = jd(s.y,s.m,s.d,0);
+    let nhy=ym.hy, nhm=ym.hm+1; if(nhm>12){nhm=1;nhy++;}
+    const s2 = getMonthStart(nhy,nhm,lat,lon,tz,elevM,criteriaKey);
+    const s2JD = jd(s2.y,s2.m,s2.d,0);
+    if(jdTarget>=sJD && jdTarget<s2JD){
+      return {hy:ym.hy, hm:ym.hm, hd: Math.round(jdTarget-sJD)+1};
+    }
+    if(jdTarget<sJD){ ym.hm--; if(ym.hm<1){ym.hm=12; ym.hy--; } }
+    else { ym.hm++; if(ym.hm>12){ym.hm=1; ym.hy++;} }
+  }
+  return {hy:ym.hy, hm:ym.hm, hd:1};
+}
+function hijriToGregorian(hy,hm,hd, lat,lon,tz,elevM, criteriaKey){
+  const s = getMonthStart(hy,hm,lat,lon,tz,elevM,criteriaKey);
+  return addDays(s.y,s.m,s.d,hd-1);
+}
+
+/* ================= RASHDUL KIBLAT ================= */
+// Global: dates in year where sun declination crosses Kaaba latitude, then transit time over Mecca meridian
+function findRashdulGlobal(year){
+  const targetDec = KAABA_LAT;
+  const points=[];
+  // scan whole year day by day for sign change of (Dec - targetDec)
+  let prevDiff=null, prevYMD=null;
+  for(let doy=1; doy<=366; doy++){
+    const dt = new Date(Date.UTC(year,0,1)); dt.setUTCDate(dt.getUTCDate()+doy-1);
+    const yy=dt.getUTCFullYear(), mm=dt.getUTCMonth()+1, dd=dt.getUTCDate();
+    if(yy!==year) continue;
+    const T=(jd(yy,mm,dd,12)-2451545.0)/36525;
+    const s=sunPos(T);
+    const diff = s.Dec - targetDec;
+    if(prevDiff!==null && Math.sign(diff)!==Math.sign(prevDiff)){
+      // refine via linear interpolation between prevYMD and this day
+      points.push({y:yy,m:mm,d:dd});
+    }
+    prevDiff=diff; prevYMD={y:yy,m:mm,d:dd};
+  }
+  // for each date found, compute transit (solar noon) time at Mecca longitude, in UT, then we return UT moment
+  return points.map(p=>{
+    const T=(jd(p.y,p.m,p.d,12)-2451545.0)/36525;
+    const s=sunPos(T);
+    const transitUT = 12 - KAABA_LON/15 - s.eot/60; // hours UT
+    return {date:p, transitUT};
+  });
+}
+// Daily rashdul kiblat: time when sun azimuth == qibla azimuth, for given date & location
+function findRashdulDaily(y,m,d, lat,lon,tz){
+  const qAz = qiblaAzimuth(lat,lon);
+  let best=null, bestDiff=1e9;
+  for(let hh=0; hh<24; hh+=0.02){
+    const JD_UT = jd(y,m,d,hh)-tz/24;
+    const T=(JD_UT-2451545.0)/36525;
+    const s=sunPos(T);
+    const eq=eclToEqu(s.appLon,0,s.eps);
+    const h=horizontal(eq.RA,eq.Dec,lat,lon,JD_UT);
+    if(h.alt>0){
+      let diff = Math.abs(((h.az-qAz+540)%360)-180);
+      if(diff<bestDiff){bestDiff=diff; best=hh;}
+    }
+  }
+  if(best===null || bestDiff>2) return null;
+  // refine with finer step around best
+  let bb=best, bd=bestDiff;
+  for(let hh=best-0.02; hh<=best+0.02; hh+=0.0005){
+    const JD_UT = jd(y,m,d,hh)-tz/24;
+    const T=(JD_UT-2451545.0)/36525;
+    const s=sunPos(T);
+    const eq=eclToEqu(s.appLon,0,s.eps);
+    const h=horizontal(eq.RA,eq.Dec,lat,lon,JD_UT);
+    let diff = Math.abs(((h.az-qAz+540)%360)-180);
+    if(diff<bd){bd=diff; bb=hh;}
+  }
+  return bb;
+}
+
+/* ================= GERHANA (deteksi kemungkinan gerhana matahari/bulan) ================= */
+function eclipseTestAtSyzygy(JDE_UT){
+  const T=(JDE_UT-2451545.0)/36525;
+  const m=moonPos(T);
+  return m.lat; // ecliptic latitude of Moon (deg) at syzygy
+}
+function classifyEclipse(beta, isSolar){
+  const b=Math.abs(beta);
+  if(isSolar){
+    if(b<0.99) return {status:'pasti', label:'Pasti Terjadi Gerhana Matahari'};
+    if(b<1.55) return {status:'mungkin', label:'Mungkin Terjadi Gerhana Matahari'};
+    return {status:'tidak', label:'Tidak Terjadi Gerhana Matahari'};
+  } else {
+    if(b<0.90) return {status:'pasti', label:'Pasti Terjadi Gerhana Bulan'};
+    if(b<1.55) return {status:'mungkin', label:'Mungkin Terjadi Gerhana Bulan'};
+    return {status:'tidak', label:'Tidak Terjadi Gerhana Bulan'};
+  }
+}
+function findEclipsesInYear(year){
+  const kStart = Math.floor(kApprox(year-0.3));
+  const kEnd = Math.ceil(kApprox(year+1.3));
+  const out=[];
+  for(let k=kStart;k<=kEnd;k++){
+    const nmJDE = newMoonJDE(k);
+    const nmCal = fromJD(nmJDE);
+    if(nmCal.y===year){
+      const beta = eclipseTestAtSyzygy(nmJDE);
+      out.push({type:'solar', k, jde:nmJDE, cal:nmCal, beta, cls:classifyEclipse(beta,true)});
+    }
+    const fmJDE = fullMoonJDE(k);
+    const fmCal = fromJD(fmJDE);
+    if(fmCal.y===year){
+      const beta2 = eclipseTestAtSyzygy(fmJDE);
+      out.push({type:'lunar', k, jde:fmJDE, cal:fmCal, beta:beta2, cls:classifyEclipse(beta2,false)});
+    }
+  }
+  out.sort((a,b)=>a.jde-b.jde);
+  return out;
+}
+
+/* ================= IMSAKIYAH GENERATOR ================= */
+function computeDayTimes(y,m,d, lat,lon,tz,elevM, asrFactor, ihtiyat){
+  const dip = dipCorr(elevM);
+  const subuh = sunTimeForAltitude(y,m,d,lat,lon,tz,-20,true);
+  const syuruq = sunTimeForAltitude(y,m,d,lat,lon,tz,-(0.8333+dip),true);
+  const dzuhur = sunTransitLocal(y,m,d,lon,tz);
+  const T=(jd(y,m,d,12-tz)-2451545.0)/36525;
+  const s=sunPos(T);
+  const altAsr = asrAltitude(lat,s.Dec,asrFactor);
+  const ashar = sunTimeForAltitude(y,m,d,lat,lon,tz,altAsr,false);
+  const maghrib = sunTimeForAltitude(y,m,d,lat,lon,tz,-(0.8333+dip),false);
+  const isya = sunTimeForAltitude(y,m,d,lat,lon,tz,-18,false);
+  const ih = ihtiyat/60;
+  const imsak = (subuh===null)?null: subuh - 10/60 - ih;
+  return {
+    imsak, subuh: subuh===null?null:subuh-ih, syuruq, dzuhur: dzuhur+ih, ashar: ashar===null?null:ashar+ih,
+    maghrib: maghrib===null?null:maghrib+ih, isya: isya===null?null:isya+ih
+  };
+}
+
+/* ================= THEME ================= */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  const meta = document.getElementById('metaThemeColor');
+  if(meta) meta.setAttribute('content', t==='dark' ? '#0a0f1e' : '#eef2fa');
+  try{ localStorage.setItem('falak_theme', t); }catch(e){}
+}
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  const cur = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark':'light';
+  applyTheme(cur==='dark' ? 'light' : 'dark');
+});
+
+/* ================= STATE ================= */
+let LOC = {name:'Jakarta', lat:-6.16667, lon:106.81667, tz:7, elev:0};
+(function loadLoc(){
+  try{
+    const saved = localStorage.getItem('falak_loc');
+    if(saved) LOC = JSON.parse(saved);
+  }catch(e){}
+})();
+function saveLoc(){ try{ localStorage.setItem('falak_loc', JSON.stringify(LOC)); }catch(e){} }
+let ASR_FACTOR = 1;
+let IHTIYAT = 2;
+
+/* ================= NAV (liquid glass dock) ================= */
+const pages = document.querySelectorAll('.page');
+const dockBtns = document.querySelectorAll('.ldock-btn');
+const bubble = document.getElementById('bubble');
+function moveBubble(btn){
+  const dock = document.getElementById('dock');
+  const dr = dock.getBoundingClientRect(), br = btn.getBoundingClientRect();
+  bubble.style.left = (br.left - dr.left) + 'px';
+  bubble.style.width = br.width + 'px';
+}
+const HEADER_META = {
+  'page-home': ['Hisab Falakiyah','Kalkulator astronomi Islam offline'],
+  'page-kalender': ['Kalender Hijriyah','Konversi & tampilan bulan Hijriyah'],
+  'page-awalbulan': ['Awal Bulan Hijriyah','Ijtimak, hilal & kriteria penentuan'],
+  'page-imsakiyah': ['Imsakiyah','Jadwal waktu sholat bulanan'],
+  'page-lainnya': ['Kiblat, Rashdul & Gerhana','Alat bantu falak lainnya'],
+};
+function showPage(id){
+  pages.forEach(p=>p.classList.toggle('active', p.id===id));
+  const meta = HEADER_META[id];
+  if(meta){ document.getElementById('hdrTitle').textContent = meta[0]; document.getElementById('hdrSub').textContent = meta[1]; }
+  dockBtns.forEach(b=>{
+    const isActive = b.dataset.target===id;
+    b.classList.toggle('active', isActive);
+    if(isActive) moveBubble(b);
+  });
+  const mainEl = document.getElementById('mainEl');
+  if(mainEl.scrollTo) mainEl.scrollTo({top:0, behavior:'instant' in document.documentElement.style?'instant':'auto'});
+  refreshPage(id);
+}
+dockBtns.forEach(btn=> btn.addEventListener('click', ()=> showPage(btn.dataset.target)));
+document.querySelectorAll('[data-nav]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    showPage(el.dataset.nav);
+    if(el.dataset.sub) showSub(el.dataset.sub);
+  });
+});
+window.addEventListener('resize', ()=>{
+  const activeBtn = document.querySelector('.ldock-btn.active');
+  if(activeBtn) moveBubble(activeBtn);
+});
+window.addEventListener('load', ()=>{
+  const activeBtn = document.querySelector('.ldock-btn.active');
+  if(activeBtn) moveBubble(activeBtn);
+});
+
+/* subnav within "Lainnya" */
+function showSub(id){
+  document.querySelectorAll('.subpage').forEach(p=>p.classList.toggle('active', p.id===id));
+  document.querySelectorAll('#subnavLainnya .sitem').forEach(s=>s.classList.toggle('active', s.dataset.sub===id));
+}
+document.querySelectorAll('#subnavLainnya .sitem').forEach(s=> s.addEventListener('click', ()=> showSub(s.dataset.sub)));
+
+/* ================= LOCATION MODAL ================= */
+const locModal = document.getElementById('locModal');
+function openLocModal(){
+  locModal.classList.add('show');
+  document.getElementById('citySearch').value='';
+  renderCityList('');
+  setTimeout(()=>document.getElementById('citySearch').focus(), 200);
+}
+function closeLocModal(){ locModal.classList.remove('show'); }
+locModal.addEventListener('click', (e)=>{ if(e.target===locModal) closeLocModal(); });
+document.getElementById('locChip').addEventListener('click', openLocModal);
+document.getElementById('openLocFromLokasi').addEventListener('click', openLocModal);
+function renderCityList(q){
+  q = (q||'').toUpperCase().trim();
+  const list = document.getElementById('cityList');
+  const filtered = q ? CITIES.filter(c=>c.n.includes(q)).slice(0,60) : CITIES.slice(0,60);
+  list.innerHTML = filtered.map((c,i)=>{
+    const idx = CITIES.indexOf(c);
+    return `<div class="city-item" data-idx="${idx}"><div><div class="n">${c.n}</div><div class="c">${c.c} · UTC+${c.tz}</div></div><div class="c">${c.lat.toFixed(2)}, ${c.lon.toFixed(2)}</div></div>`;
+  }).join('') || '<div class="note">Kota tidak ditemukan.</div>';
+  list.querySelectorAll('.city-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const c = CITIES[+el.dataset.idx];
+      LOC = {name:c.n, lat:c.lat, lon:c.lon, tz:c.tz, elev:0};
+      saveLoc(); closeLocModal(); onLocationChanged();
+    });
+  });
+}
+document.getElementById('citySearch').addEventListener('input', (e)=> renderCityList(e.target.value));
+document.getElementById('gpsBtn').addEventListener('click', ()=>{
+  if(!navigator.geolocation){ alert('GPS tidak tersedia di perangkat/browser ini.'); return; }
+  navigator.geolocation.getCurrentPosition((pos)=>{
+    LOC = {name:'Lokasi GPS Saya', lat:pos.coords.latitude, lon:pos.coords.longitude, tz:-(new Date().getTimezoneOffset()/60), elev:pos.coords.altitude||0};
+    saveLoc(); onLocationChanged();
+  }, (err)=>{ alert('Gagal mengambil lokasi GPS: '+err.message); });
+});
+document.getElementById('custApply').addEventListener('click', ()=>{
+  const lat=parseFloat(document.getElementById('custLat').value);
+  const lon=parseFloat(document.getElementById('custLon').value);
+  const tz=parseFloat(document.getElementById('custTz').value);
+  const elev=parseFloat(document.getElementById('custElev').value)||0;
+  if(isNaN(lat)||isNaN(lon)||isNaN(tz)){ alert('Lengkapi koordinat dengan benar.'); return; }
+  LOC = {name:'Lokasi Kustom', lat,lon,tz,elev};
+  saveLoc(); onLocationChanged();
+});
+function onLocationChanged(){
+  for(const k in monthStartCache) delete monthStartCache[k];
+  updateLocDisplays();
+  refreshPage(document.querySelector('.page.active').id);
+}
+function updateLocDisplays(){
+  document.getElementById('locChipName').textContent = LOC.name;
+  document.getElementById('locName2').textContent = LOC.name;
+  document.getElementById('locLat2').textContent = dmsStr(LOC.lat,'LU','LS');
+  document.getElementById('locLon2').textContent = dmsStr(LOC.lon,'BT','BB');
+  document.getElementById('locTz2').textContent = 'UTC'+(LOC.tz>=0?'+':'')+LOC.tz;
+  document.getElementById('locElev2').textContent = (LOC.elev||0)+' m';
+  document.getElementById('qLoc').textContent = LOC.name;
+}
+
+/* ================= POPULATE SELECTS ================= */
+const GREG_MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+function fillSelect(sel, arr, selectedIdx){
+  sel.innerHTML = arr.map((n,i)=>`<option value="${i+1}" ${i+1===selectedIdx?'selected':''}>${n}</option>`).join('');
+}
+fillSelect(document.getElementById('convHM'), HIJRI_MONTHS, 1);
+fillSelect(document.getElementById('abMonth'), HIJRI_MONTHS, ANCHOR_HM);
+fillSelect(document.getElementById('imMonth'), GREG_MONTHS, new Date().getMonth()+1);
+document.getElementById('imYear').value = new Date().getFullYear();
+document.getElementById('grYear').value = new Date().getFullYear();
+document.getElementById('rkDate').value = new Date().toISOString().slice(0,10);
+document.getElementById('convDateIn').value = new Date().toISOString().slice(0,10);
+
+/* ================= HOME PAGE ================= */
+function renderHome(){
+  const now = new Date();
+  const y=now.getFullYear(), m=now.getMonth()+1, d=now.getDate();
+  const h = gregorianToHijri(y,m,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+  document.getElementById('homeHijri').textContent = `${h.hd} ${HIJRI_MONTHS[h.hm-1]} ${h.hy} H`;
+  document.getElementById('homeGreg').textContent = `${dowName(y,m,d)}, ${d} ${GREG_MONTHS[m-1]} ${y} M`;
+  document.getElementById('homeLoc').textContent = `📍 ${LOC.name} (${LOC.lat.toFixed(3)}, ${LOC.lon.toFixed(3)})`;
+
+  const t = computeDayTimes(y,m,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
+  const rows = [['Imsak',t.imsak],['Shubuh',t.subuh],['Terbit',t.syuruq],['Dzuhur',t.dzuhur],['Ashar',t.ashar],['Maghrib',t.maghrib],["Isya",t.isya]];
+  document.getElementById('homePrayerTable').innerHTML =
+    '<tr>'+rows.map(r=>`<th>${r[0]}</th>`).join('')+'</tr>'+
+    '<tr>'+rows.map(r=>`<td>${hToHM(r[1])}</td>`).join('')+'</tr>';
+
+  const JD_now = jd(y,m,d, now.getHours()+now.getMinutes()/60) - LOC.tz/24;
+  const ph = moonPhaseInfo(JD_now);
+  document.getElementById('homeMoonPhase').textContent = ph.name.split(' (')[0];
+  document.getElementById('homeIllum').textContent = Math.round(ph.illum*100)+'%';
+  const T=(JD_now-2451545.0)/36525;
+  // moon age: hours since last conjunction
+  let k = Math.floor(kApprox(y+(m-1)/12));
+  let lastConj = newMoonJDE(k);
+  while(lastConj>JD_now){ k--; lastConj=newMoonJDE(k); }
+  let nextConj = newMoonJDE(k+1);
+  while(nextConj<=JD_now){ k++; lastConj=nextConj; nextConj=newMoonJDE(k+1); }
+  const ageDays = JD_now-lastConj;
+  document.getElementById('homeMoonAge').textContent = ageDays.toFixed(1)+' hari';
+  const qAz = qiblaAzimuth(LOC.lat,LOC.lon);
+  document.getElementById('homeQibla').textContent = qAz.toFixed(1)+'°';
+}
+
+/* ================= KALENDER PAGE ================= */
+let calState = {hy:ANCHOR_HY, hm:ANCHOR_HM};
+(function initCalState(){
+  const now=new Date();
+  const h = gregorianToHijri(now.getFullYear(),now.getMonth()+1,now.getDate(), LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+  calState = {hy:h.hy, hm:h.hm};
+})();
+function renderKalender(){
+  const {hy,hm} = calState;
+  const start = getMonthStart(hy,hm, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+  const len = hijriMonthLength(hy,hm, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+  document.getElementById('calTitleH').textContent = `${HIJRI_MONTHS[hm-1]} ${hy} H`;
+  const endDate = addDays(start.y,start.m,start.d,len-1);
+  document.getElementById('calTitleM').textContent = `${start.d} ${GREG_MONTHS[start.m-1]}${start.m!==endDate.m?'':''} — ${endDate.d} ${GREG_MONTHS[endDate.m-1]} ${endDate.y}`;
+  const firstDow = new Date(Date.UTC(start.y,start.m-1,start.d)).getUTCDay();
+  const cells = [];
+  const dowShort=['Ah','Sn','Sl','Rb','Km','Jm','Sb'];
+  let html = dowShort.map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<firstDow;i++) html += '<div class="cal-cell empty"></div>';
+  const today = new Date();
+  for(let i=0;i<len;i++){
+    const g = addDays(start.y,start.m,start.d,i);
+    const isToday = g.y===today.getFullYear()&&g.m===today.getMonth()+1&&g.d===today.getDate();
+    html += `<div class="cal-cell ${isToday?'today':''}"><div>${g.d}/${g.m}</div><div class="hj">${i+1}H</div></div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+  let extraNote = '';
+  if(hm===9 || hm===10){
+    extraNote = ` ⏳ Awal ${HIJRI_MONTHS[hm-1]} ${hy}H menunggu hasil <b>Sidang Isbat Kemenag RI (Depag)</b> — tanggal di atas adalah estimasi hisab, bukan penetapan resmi.`;
+  }
+  document.getElementById('calNote').innerHTML = `Awal bulan dihitung otomatis via hisab hakiki (kriteria MABIMS 2021) untuk lokasi <b>${LOC.name}</b>. Jumlah hari bulan ini: <b>${len} hari</b>.${extraNote}`;
+}
+document.getElementById('calPrev').addEventListener('click', ()=>{
+  calState.hm--; if(calState.hm<1){calState.hm=12; calState.hy--;}
+  renderKalender();
+});
+document.getElementById('calNext').addEventListener('click', ()=>{
+  calState.hm++; if(calState.hm>12){calState.hm=1; calState.hy++;}
+  renderKalender();
+});
+
+/* converter */
+let convMode='mh';
+document.getElementById('convModeMH').addEventListener('click', ()=>{
+  convMode='mh'; document.getElementById('convModeMH').classList.add('active'); document.getElementById('convModeHM').classList.remove('active');
+  document.getElementById('convMasehiIn').style.display=''; document.getElementById('convHijriIn').style.display='none';
+});
+document.getElementById('convModeHM').addEventListener('click', ()=>{
+  convMode='hm'; document.getElementById('convModeHM').classList.add('active'); document.getElementById('convModeMH').classList.remove('active');
+  document.getElementById('convMasehiIn').style.display='none'; document.getElementById('convHijriIn').style.display='';
+});
+document.getElementById('convBtn').addEventListener('click', ()=>{
+  if(convMode==='mh'){
+    const val = document.getElementById('convDateIn').value;
+    if(!val) return;
+    const [y,m,d] = val.split('-').map(Number);
+    const h = gregorianToHijri(y,m,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+    document.getElementById('convResult').textContent = `${h.hd} ${HIJRI_MONTHS[h.hm-1]} ${h.hy} H`;
+  } else {
+    const hd=+document.getElementById('convHD').value, hm=+document.getElementById('convHM').value, hy=+document.getElementById('convHY').value;
+    const g = hijriToGregorian(hy,hm,hd, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+    document.getElementById('convResult').textContent = `${dowName(g.y,g.m,g.d)}, ${g.d} ${GREG_MONTHS[g.m-1]} ${g.y} M`;
+  }
+});
+
+/* ================= AWAL BULAN PAGE ================= */
+document.getElementById('abBtn').addEventListener('click', ()=>{
+  const hm = +document.getElementById('abMonth').value, hy = +document.getElementById('abYear').value;
+  const k = kForHijriYM(hy,hm);
+  const res = computeAwalBulan(k, LOC.lat,LOC.lon,LOC.tz,LOC.elev);
+  document.getElementById('abResultWrap').style.display='';
+  if(hm===9 || hm===10){
+    const namaBulan = hm===9 ? 'Ramadhan' : 'Syawal';
+    document.getElementById('abIsbatNote').innerHTML = `<div class="isbat-banner"><div class="ic">⏳</div><div class="t"><b>Awal ${namaBulan} ${hy}H menunggu hasil Sidang Isbat Kemenag RI.</b><br>Hasil hisab di bawah ini adalah estimasi perhitungan astronomis, bukan penetapan resmi. Penentuan 1 ${namaBulan} secara syar'i tetap merujuk pada keputusan resmi Sidang Isbat Kementerian Agama RI (Depag).</div></div>`;
+  } else {
+    document.getElementById('abIsbatNote').innerHTML = '';
+  }
+  const ijCal = fromJD(res.ijUT + LOC.tz/24);
+  document.getElementById('abIjtimak').textContent = `${Math.floor(ijCal.d)}-${ijCal.m}-${ijCal.y} pukul ${hToHM(ijCal.h)} (UTC${LOC.tz>=0?'+':''}${LOC.tz})`;
+  const ref = res.ref;
+  if(res.ev){
+    document.getElementById('abGhurub').textContent = `${dowName(ref.y,ref.m,ref.d)}, ${ref.d}-${ref.m}-${ref.y} pukul ${hToHM(res.ev.maghribH)}`;
+    document.getElementById('abAltHakiki').textContent = res.ev.altHakiki.toFixed(3)+'°';
+    document.getElementById('abAltMari').textContent = res.ev.altMari.toFixed(3)+'°';
+    document.getElementById('abElong').textContent = res.ev.elong.toFixed(3)+'°';
+    const ageH = (res.ijUT + LOC.tz/24 <= jd(ref.y,ref.m,ref.d,res.ev.maghribH)) ? ((jd(ref.y,ref.m,ref.d,res.ev.maghribH)-LOC.tz/24)-res.ijUT)*24 : 0;
+    document.getElementById('abAge').textContent = ageH.toFixed(1)+' jam';
+    document.getElementById('abAzSun').textContent = res.ev.azSun.toFixed(3)+'°';
+    document.getElementById('abAzMoon').textContent = res.ev.azMoon.toFixed(3)+'°';
+    document.getElementById('abLama').textContent = (res.ev.altHakiki>0? '≈ '+(res.ev.altHakiki/15*60).toFixed(0)+' menit (setelah ghurub)' : 'Hilal terbenam sebelum/berbarengan Matahari');
+  } else {
+    document.getElementById('abGhurub').textContent = 'Matahari tidak terbenam (lintang ekstrem)';
+  }
+  document.getElementById('abCriteriaCard').innerHTML = res.results.map((r,i)=>{
+    const badgeCls = r.met ? '' : 'warn';
+    return `<div class="conclusion"><b>${i+1}. ${r.label}</b><br>
+      <span class="badge ${badgeCls}">${r.met?'Hilal Terpenuhi':'Belum Terpenuhi (Istikmal)'}</span><br><br>
+      Awal ${HIJRI_MONTHS[hm-1]} ${hy}H jatuh pada <b>${dowName(r.startDate.y,r.startDate.m,r.startDate.d)} ${pasaranName(r.startDate.y,r.startDate.m,r.startDate.d)}</b>,
+      tanggal <b>${r.startDate.d}-${r.startDate.m}-${r.startDate.y}</b> M
+      (bulan sebelumnya berjumlah ${r.prevMonthDays} hari).</div>`;
+  }).join('');
+});
+
+/* ================= IMSAKIYAH PAGE ================= */
+document.querySelectorAll('[data-asr]').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-asr]').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); ASR_FACTOR = +c.dataset.asr;
+  });
+});
+document.getElementById('imBtn').addEventListener('click', ()=>{
+  const mo = +document.getElementById('imMonth').value, yr = +document.getElementById('imYear').value;
+  const daysInMonth = new Date(yr,mo,0).getDate();
+  document.getElementById('imTitle').textContent = `Jadwal Sholat — ${GREG_MONTHS[mo-1]} ${yr} — ${LOC.name}`;
+  let rows='';
+  for(let d=1; d<=daysInMonth; d++){
+    const t = computeDayTimes(yr,mo,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
+    rows += `<tr><td>${d}</td><td>${dowName(yr,mo,d).slice(0,3)}</td><td>${hToHM(t.imsak)}</td><td>${hToHM(t.subuh)}</td><td>${hToHM(t.syuruq)}</td><td>${hToHM(t.dzuhur)}</td><td>${hToHM(t.ashar)}</td><td>${hToHM(t.maghrib)}</td><td>${hToHM(t.isya)}</td></tr>`;
+  }
+  document.getElementById('imTable').innerHTML =
+    `<tr><th>Tgl</th><th>Hari</th><th>Imsak</th><th>Shubuh</th><th>Terbit</th><th>Dzuhur</th><th>Ashar</th><th>Maghrib</th><th>Isya</th></tr>${rows}`;
+  document.getElementById('imResultWrap').style.display='';
+});
+
+/* ================= KIBLAT PAGE ================= */
+function renderKiblat(){
+  const az = qiblaAzimuth(LOC.lat,LOC.lon);
+  document.getElementById('qNeedle').style.transform = `rotate(${az}deg)`;
+  document.getElementById('qKaaba').style.transform = `rotate(${az}deg)`;
+  document.getElementById('qAzimuth').textContent = az.toFixed(3)+'°';
+  const fromN = az<=90 ? `U-T ${az.toFixed(1)}°` : az<=180 ? `S-T ${(180-az).toFixed(1)}°` : az<=270 ? `S-B ${(az-180).toFixed(1)}°` : `U-B ${(360-az).toFixed(1)}°`;
+  document.getElementById('qDir').textContent = fromN;
+  const dist = greatCircleDist(LOC.lat,LOC.lon,KAABA_LAT,KAABA_LON);
+  document.getElementById('qDist').textContent = Math.round(dist).toLocaleString('id-ID')+' km';
+  document.getElementById('qLoc').textContent = LOC.name;
+  // draw compass tick marks once
+  const compass = document.getElementById('compass');
+  if(!compass.dataset.built){
+    let extra='';
+    const labels={0:'U',90:'T',180:'S',270:'B'};
+    for(let a=0;a<360;a+=30){
+      extra += `<div class="tick" style="transform:rotate(${a}deg)"></div>`;
+    }
+    for(const a in labels){
+      extra += `<div class="dirlabel" style="transform:rotate(${a}deg) translate(-6px,-100px)">${labels[a]}</div>`;
+    }
+    compass.insertAdjacentHTML('afterbegin', extra);
+    compass.dataset.built='1';
+  }
+}
+
+/* ================= RASHDUL KIBLAT PAGE ================= */
+function renderRashdul(){
+  const year = new Date().getFullYear();
+  const pts = findRashdulGlobal(year);
+  const fmt = (p)=>{
+    const localH = p.transitUT + LOC.tz;
+    return `${p.date.d}-${p.date.m}-${p.date.y} pukul ${hToHM(localH)} (UTC${LOC.tz>=0?'+':''}${LOC.tz})`;
+  };
+  document.getElementById('rkGlobal1').textContent = pts[0] ? fmt(pts[0]) : '—';
+  document.getElementById('rkGlobal2').textContent = pts[1] ? fmt(pts[1]) : '—';
+}
+document.getElementById('rkBtn').addEventListener('click', ()=>{
+  const val = document.getElementById('rkDate').value; if(!val) return;
+  const [y,m,d] = val.split('-').map(Number);
+  const hh = findRashdulDaily(y,m,d, LOC.lat,LOC.lon,LOC.tz);
+  document.getElementById('rkResult').textContent = hh===null ? 'Tidak ditemukan (matahari tidak melewati arah kiblat siang ini)' : hToHM(hh)+' waktu setempat';
+});
+
+/* ================= GERHANA PAGE ================= */
+document.getElementById('grBtn').addEventListener('click', ()=>{
+  const year = +document.getElementById('grYear').value;
+  const events = findEclipsesInYear(year);
+  const monthsID = GREG_MONTHS;
+  document.getElementById('grList').innerHTML = events.map(ev=>{
+    const cal = fromJD(ev.jde + LOC.tz/24);
+    const cls = ev.cls.status;
+    const badgeCls = cls==='pasti' ? '' : cls==='mungkin' ? 'warn' : 'danger';
+    const icon = ev.type==='solar' ? '☀️' : '🌕';
+    const label = ev.type==='solar' ? 'Ijtimak (Konjungsi)' : 'Istiqbal (Oposisi)';
+    return `<div class="card">
+      <div class="card-head"><div class="ic ${ev.type==='lunar'?'teal':''}">${icon}</div>
+        <div><div class="t">${label} — ${monthsID[cal.m-1]} ${cal.y}</div><div class="s">${Math.floor(cal.d)} ${monthsID[cal.m-1]} ${cal.y}, pukul ${hToHM(cal.h)} (UTC${LOC.tz>=0?'+':''}${LOC.tz})</div></div>
+      </div>
+      <span class="badge ${badgeCls}">${ev.cls.label}</span>
+      <div class="kv" style="margin-top:8px;"><div class="k">Lintang ekliptika Bulan (β)</div><div class="v">${ev.beta.toFixed(3)}°</div></div>
+    </div>`;
+  }).join('');
+});
+
+/* ================= PAGE DISPATCH ================= */
+function refreshPage(id){
+  if(id==='page-home') renderHome();
+  else if(id==='page-kalender') renderKalender();
+  else if(id==='page-lainnya'){ renderKiblat(); renderRashdul(); }
+}
+
+/* ================= INIT ================= */
+updateLocDisplays();
+renderHome();
+setTimeout(()=>{ const b=document.querySelector('.ldock-btn.active'); if(b) moveBubble(b); }, 50);
+</script>
+</body>
+</html>
