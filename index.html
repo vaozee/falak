@@ -1590,13 +1590,7 @@ document.getElementById('abBtn').addEventListener('click', ()=>{
 });
 
 /* ================= IMSAKIYAH PAGE ================= */
-document.querySelectorAll('[data-asr]').forEach(c=>{
-  c.addEventListener('click', ()=>{
-    document.querySelectorAll('[data-asr]').forEach(x=>x.classList.remove('active'));
-    c.classList.add('active'); ASR_FACTOR = +c.dataset.asr;
-  });
-});
-document.getElementById('imBtn').addEventListener('click', ()=>{
+function renderImsakiyahTable(){
   const mo = +document.getElementById('imMonth').value, yr = +document.getElementById('imYear').value;
   const daysInMonth = new Date(yr,mo,0).getDate();
   document.getElementById('imTitle').textContent = `Jadwal Sholat — ${GREG_MONTHS[mo-1]} ${yr} — ${LOC.name}`;
@@ -1608,7 +1602,17 @@ document.getElementById('imBtn').addEventListener('click', ()=>{
   document.getElementById('imTable').innerHTML =
     `<tr><th>Tgl</th><th>Hari</th><th>Imsak</th><th>Shubuh</th><th>Terbit</th><th>Dzuhur</th><th>Ashar</th><th>Maghrib</th><th>Isya</th></tr>${rows}`;
   document.getElementById('imResultWrap').style.display='';
+}
+document.querySelectorAll('[data-asr]').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    if(c.classList.contains('active')) return;
+    document.querySelectorAll('[data-asr]').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); ASR_FACTOR = +c.dataset.asr;
+    // langsung perbarui tabel yang sedang tampil, tak perlu klik "Buat Jadwal" lagi
+    if(document.getElementById('imResultWrap').style.display !== 'none') renderImsakiyahTable();
+  });
 });
+document.getElementById('imBtn').addEventListener('click', renderImsakiyahTable);
 
 /* ================= KIBLAT PAGE ================= */
 function renderKiblat(){
