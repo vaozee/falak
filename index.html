@@ -35,7 +35,7 @@
     --compass-a:rgba(25,40,80,0.07); --compass-b:rgba(25,40,80,0.015); --compass-shadow:inset 0 0 30px rgba(25,40,80,0.08), inset 0 1px 0 rgba(255,255,255,0.7); --compass-tick:rgba(25,40,80,0.22);
     --modal-overlay:rgba(20,30,55,0.4); --modal-sheet-bg:rgba(255,255,255,0.82); --modal-shadow:0 -24px 60px rgba(20,30,60,0.2), inset 0 1px 0 rgba(255,255,255,0.9);
     --header-bg:linear-gradient(180deg, rgba(238,242,250,0.88), rgba(238,242,250,0.65) 70%, transparent);
-    --star-opacity:0; --body-bg-extra:radial-gradient(ellipse 900px 500px at 15% -5%, rgba(63,201,180,0.14), transparent 60%), radial-gradient(ellipse 700px 500px at 100% 0%, rgba(221,154,53,0.10), transparent 55%);
+    --star-opacity:0; --body-bg-extra:radial-gradient(ellipse 1000px 620px at 10% -8%, rgba(47,127,219,0.16), transparent 60%), radial-gradient(ellipse 900px 600px at 105% 0%, rgba(63,201,180,0.16), transparent 58%), radial-gradient(ellipse 800px 560px at 50% 110%, rgba(221,154,53,0.09), transparent 55%);
     --radius-lg:22px; --radius-md:16px; --radius-sm:11px; --radius-pill:999px;
     --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
   }
@@ -74,7 +74,7 @@
     -webkit-backdrop-filter:blur(30px) saturate(180%);
   }
   html[data-theme="dark"]{
-    --bg0:#05070f; --bg1:#0a0f1f; --bg2:#0e1526;
+    --bg0:#040816; --bg1:#0a1130; --bg2:#0e1a3d;
     --glass: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.02) 55%), rgba(255,255,255,0.055);
     --glass-strong: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0.05) 55%), rgba(255,255,255,0.10);
     --glass-border:rgba(255,255,255,0.22); --glass-border-soft:rgba(255,255,255,0.10);
@@ -88,7 +88,7 @@
     --compass-a:rgba(255,255,255,0.09); --compass-b:rgba(255,255,255,0.02); --compass-shadow:inset 0 0 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.14); --compass-tick:rgba(255,255,255,0.16);
     --modal-overlay:rgba(0,0,0,0.6); --modal-sheet-bg:rgba(14,21,38,0.82); --modal-shadow:0 -24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
     --header-bg:linear-gradient(180deg, rgba(5,7,15,0.88), rgba(5,7,15,0.68) 70%, transparent);
-    --star-opacity:0.55; --body-bg-extra:radial-gradient(ellipse 900px 500px at 15% -5%, rgba(95,214,196,0.16), transparent 60%), radial-gradient(ellipse 700px 500px at 100% 0%, rgba(232,192,114,0.10), transparent 55%);
+    --star-opacity:0.55; --body-bg-extra:radial-gradient(ellipse 1000px 650px at 100% -5%, rgba(34,211,238,0.24), transparent 60%), radial-gradient(ellipse 900px 620px at -5% 15%, rgba(37,99,235,0.26), transparent 58%), radial-gradient(ellipse 800px 550px at 55% 105%, rgba(95,214,196,0.14), transparent 58%);
   }
   /* ---- Liquid Glass boost (tema gelap): blur+saturate lebih tegas & tepi lebih hidup ---- */
   html[data-theme="dark"] .card,
@@ -148,11 +148,13 @@
   .app{position:relative; z-index:1; width:100%; max-width:520px; margin:0 auto; min-height:100%; display:flex; flex-direction:column;}
   /* ---------- header ---------- */
   header.top{
-    position:sticky; top:0; z-index:20; padding:calc(var(--safe-top) + 14px) 18px 12px;
-    background:var(--header-bg);
-    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    position:sticky; top:8px; z-index:20; margin:8px 12px 10px; padding:14px 16px;
+    border-radius:var(--radius-lg); background:var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%);
+    box-shadow:var(--card-shadow); overflow:hidden;
     display:flex; align-items:center; justify-content:space-between; gap:8px;
   }
+  header.top{ margin-top:calc(var(--safe-top) + 8px); }
   header.top .htxt{min-width:0; flex:1;}
   header.top h1{font-size:19px; margin:0; font-weight:800; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   header.top .sub{font-size:12px; color:var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -168,7 +170,7 @@
   .loc-chip{
     display:flex; align-items:center; gap:6px; background:var(--glass); border:1px solid var(--glass-border);
     padding:8px 12px; border-radius:var(--radius-pill); font-size:12px; color:var(--text-dim); flex-shrink:0; cursor:pointer;
-    max-width:150px;
+    max-width:150px; box-shadow:0 0 0 1px rgba(95,214,196,0.12), 0 6px 16px rgba(37,99,235,0.10);
   }
   .loc-chip span.dot{width:6px;height:6px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal); flex-shrink:0;}
   .loc-chip b{color:var(--text); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -181,9 +183,19 @@
   h2.sect:first-child{margin-top:6px;}
   /* ---------- glass card ---------- */
   .card{
+    position:relative; overflow:hidden;
     background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-lg);
     padding:16px; margin-bottom:12px; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
     box-shadow:var(--card-shadow);
+  }
+  .card::before, header.top::before{
+    content:''; position:absolute; top:0; left:8%; right:8%; height:1px; pointer-events:none;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent);
+  }
+  .card::after, header.top::after{
+    content:''; position:absolute; top:-40%; left:-20%; width:70%; height:80%; pointer-events:none;
+    background:radial-gradient(closest-side, rgba(255,255,255,0.16), transparent 70%);
+    transform:rotate(-12deg); opacity:.7;
   }
   .card-head{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
   .card-head .ic{width:36px; height:36px; border-radius:12px; background:var(--gold-grad); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; box-shadow:0 4px 14px rgba(232,192,114,0.35);}
@@ -200,6 +212,10 @@
   }
   select:focus, input:focus{border-color:rgba(95,214,196,0.5);}
   select{-webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237986a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:18px; padding-right:34px;}
+  /* Native <option> popups render on the OS/browser's own light sheet, ignoring our theme colors.
+     Force a readable dark-on-light color so the dropdown list is never invisible (e.g. light text
+     on a white system dropdown in dark theme). */
+  select option{color:#12172a; background:#ffffff; font-weight:600;}
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
   .btn{
@@ -277,11 +293,13 @@
   .cal-nav .title .h2r{font-size:11px; color:var(--text-faint);}
   .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
   .cal-grid .dow{font-size:10px; text-align:center; color:var(--text-faint); font-weight:700; padding-bottom:4px;}
-  .cal-cell{aspect-ratio:1; border-radius:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--cal-cell-bg); position:relative; font-size:12.5px; font-weight:700;}
+  .cal-cell{aspect-ratio:0.82; border-radius:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--cal-cell-bg); position:relative; font-size:12px; font-weight:700; padding:2px 1px;}
   .cal-cell.empty{background:transparent;}
-  .cal-cell .hj{font-size:9px; color:var(--gold2); font-weight:700; margin-top:1px;}
+  .cal-cell .hj{font-size:8.5px; color:var(--gold2); font-weight:700; margin-top:1px;}
+  .cal-cell .pas{font-size:7.5px; color:var(--teal); font-weight:700; margin-top:1px; opacity:.85; letter-spacing:.01em;}
   .cal-cell.today{background:var(--accent-grad); color:#04201c;}
-  .cal-cell.today .hj{color:#04201c;}
+  .cal-cell.today .hj{color:#04201c; opacity:.85;}
+  .cal-cell.today .pas{color:#04201c; opacity:.75;}
   .cal-cell.marked::after{content:''; position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--gold);}
   /* ---------- qibla compass ---------- */
   .compass-wrap{display:flex; flex-direction:column; align-items:center; padding:8px 0 4px;}
@@ -399,8 +417,8 @@
   /* ================= VERSI DESKTOP (>=900px) ================= */
   @media (min-width:900px){
     body{ display:flex; justify-content:center; }
-    .app{ max-width:1180px; }
-    header.top{ padding:28px 8px 4px; backdrop-filter:none; -webkit-backdrop-filter:none; background:transparent; position:relative; }
+    .app{ max-width:min(94vw, 1180px); }
+    header.top{ padding:22px 28px; }
     header.top h1{ font-size:26px; }
     header.top .sub{ font-size:13.5px; }
     .loc-chip{ padding:10px 16px; font-size:13px; }
@@ -427,9 +445,38 @@
     .orbit-layout .card:first-child{ flex:1 1 62%; min-width:0; }
     .orbit-stats-card{ flex:0 0 300px; }
     .orbit-wrap{ aspect-ratio:16/11; }
+
+    /* kalender Hijriyah: sel jadi persegi wajar & teksnya ikut membesar, bukan tetap
+       berukuran mobile di dalam sel yang sudah jauh lebih besar */
+    .cal-nav .cbtn{ width:42px; height:42px; font-size:19px; }
+    .cal-nav .title .h1r{ font-size:20px; }
+    .cal-nav .title .h2r{ font-size:13px; }
+    .cal-grid{ gap:10px; }
+    .cal-grid .dow{ font-size:13.5px; padding-bottom:10px; }
+    .cal-cell{ aspect-ratio:1/0.92; border-radius:16px; padding:6px; gap:3px; }
+    .cal-cell > div:first-child{ font-size:22px; font-weight:800; }
+    .cal-cell .hj{ font-size:14px; margin-top:2px; }
+    .cal-cell .pas{ font-size:13.5px; margin-top:2px; }
+    .cal-cell.marked::after{ width:6px; height:6px; bottom:8px; }
   }
-  @media (min-width:1200px){
-    .app{ max-width:1320px; }
+  /* layar laptop besar / desktop biasa: lebar kontainer ikut membesar mengikuti viewport
+     (bukan cap tetap) supaya ruang kosong kiri-kanan tidak berlebihan */
+  @media (min-width:1300px){
+    .app{ max-width:min(92vw, 1480px); }
+  }
+  @media (min-width:1600px){
+    .app{ max-width:min(88vw, 1760px); }
+    .quick-grid{ grid-template-columns:repeat(4,1fr); gap:14px; }
+    .stat-grid{ grid-template-columns:repeat(4,1fr); gap:14px; }
+    .card{ padding:24px; }
+    .cal-cell > div:first-child{ font-size:26px; }
+    .cal-cell .hj{ font-size:15px; }
+    .cal-cell .pas{ font-size:14.5px; }
+  }
+  /* monitor ultra-wide: dibatasi supaya baris teks tidak terlalu panjang untuk dibaca,
+     tapi tetap jauh lebih lebar dari sebelumnya agar tidak ada gutter raksasa */
+  @media (min-width:2000px){
+    .app{ max-width:min(78vw, 2000px); }
   }
 </style>
 </head>
@@ -586,11 +633,25 @@
     <section class="page" id="page-imsakiyah">
       <h2 class="sect">Jadwal Imsakiyah / Waktu Sholat</h2>
       <div class="card">
-        <div class="row2">
-          <div class="field"><label class="lbl">Bulan</label>
-            <select id="imMonth"></select>
+        <div class="chips" style="margin-bottom:12px;">
+          <div class="chip active" id="imModeM">Masehi</div>
+          <div class="chip" id="imModeH">Hijriyah</div>
+        </div>
+        <div id="imMasehiIn">
+          <div class="row2">
+            <div class="field"><label class="lbl">Bulan</label>
+              <select id="imMonth"></select>
+            </div>
+            <div class="field"><label class="lbl">Tahun</label><input type="number" id="imYear"></div>
           </div>
-          <div class="field"><label class="lbl">Tahun</label><input type="number" id="imYear"></div>
+        </div>
+        <div id="imHijriIn" style="display:none;">
+          <div class="row2">
+            <div class="field"><label class="lbl">Bulan Hijriyah</label>
+              <select id="imMonthH"></select>
+            </div>
+            <div class="field"><label class="lbl">Tahun Hijriyah</label><input type="number" id="imYearH" value="1447"></div>
+          </div>
         </div>
         <div class="field">
           <label class="lbl">Madzhab Ashar</label>
@@ -1520,6 +1581,8 @@ fillSelect(document.getElementById('convHM'), HIJRI_MONTHS, 1);
 fillSelect(document.getElementById('abMonth'), HIJRI_MONTHS, ANCHOR_HM);
 fillSelect(document.getElementById('imMonth'), GREG_MONTHS, new Date().getMonth()+1);
 document.getElementById('imYear').value = new Date().getFullYear();
+fillSelect(document.getElementById('imMonthH'), HIJRI_MONTHS, ANCHOR_HM);
+document.getElementById('imYearH').value = ANCHOR_HY;
 document.getElementById('grYear').value = new Date().getFullYear();
 document.getElementById('rkDate').value = new Date().toISOString().slice(0,10);
 document.getElementById('convDateIn').value = new Date().toISOString().slice(0,10);
@@ -1579,7 +1642,8 @@ function renderKalender(){
   for(let i=0;i<len;i++){
     const g = addDays(start.y,start.m,start.d,i);
     const isToday = g.y===today.getFullYear()&&g.m===today.getMonth()+1&&g.d===today.getDate();
-    html += `<div class="cal-cell ${isToday?'today':''}"><div>${g.d}/${g.m}</div><div class="hj">${i+1}H</div></div>`;
+    const pas = pasaranName(g.y,g.m,g.d);
+    html += `<div class="cal-cell ${isToday?'today':''}"><div>${g.d}/${g.m}</div><div class="hj">${i+1}H</div><div class="pas">${pas}</div></div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
   let extraNote = '';
@@ -1660,17 +1724,41 @@ document.getElementById('abBtn').addEventListener('click', ()=>{
 });
 
 /* ================= IMSAKIYAH PAGE ================= */
+let imMode = 'm'; // 'm' = Masehi, 'h' = Hijriyah
+document.getElementById('imModeM').addEventListener('click', ()=>{
+  if(imMode==='m') return;
+  imMode='m'; document.getElementById('imModeM').classList.add('active'); document.getElementById('imModeH').classList.remove('active');
+  document.getElementById('imMasehiIn').style.display=''; document.getElementById('imHijriIn').style.display='none';
+});
+document.getElementById('imModeH').addEventListener('click', ()=>{
+  if(imMode==='h') return;
+  imMode='h'; document.getElementById('imModeH').classList.add('active'); document.getElementById('imModeM').classList.remove('active');
+  document.getElementById('imMasehiIn').style.display='none'; document.getElementById('imHijriIn').style.display='';
+});
 function renderImsakiyahTable(){
-  const mo = +document.getElementById('imMonth').value, yr = +document.getElementById('imYear').value;
-  const daysInMonth = new Date(yr,mo,0).getDate();
-  document.getElementById('imTitle').textContent = `Jadwal Sholat — ${GREG_MONTHS[mo-1]} ${yr} — ${LOC.name}`;
-  let rows='';
-  for(let d=1; d<=daysInMonth; d++){
-    const t = computeDayTimes(yr,mo,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
-    rows += `<tr><td>${d}</td><td>${dowName(yr,mo,d).slice(0,3)}</td><td>${hToHM(t.imsak)}</td><td>${hToHM(t.subuh)}</td><td>${hToHM(t.syuruq)}</td><td>${hToHM(t.dzuhur)}</td><td>${hToHM(t.ashar)}</td><td>${hToHM(t.maghrib)}</td><td>${hToHM(t.isya)}</td></tr>`;
+  let rows='', dateHeader='Tgl';
+  if(imMode==='h'){
+    const hm = +document.getElementById('imMonthH').value, hy = +document.getElementById('imYearH').value;
+    const start = getMonthStart(hy,hm, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+    const len = hijriMonthLength(hy,hm, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+    document.getElementById('imTitle').textContent = `Jadwal Sholat — ${HIJRI_MONTHS[hm-1]} ${hy}H — ${LOC.name}`;
+    dateHeader = 'Tgl H';
+    for(let i=0;i<len;i++){
+      const g = addDays(start.y,start.m,start.d,i);
+      const t = computeDayTimes(g.y,g.m,g.d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
+      rows += `<tr><td>${i+1}<div style="font-size:9.5px;font-weight:600;color:var(--text-faint);">${g.d}/${g.m}</div></td><td>${dowName(g.y,g.m,g.d).slice(0,3)}</td><td>${hToHM(t.imsak)}</td><td>${hToHM(t.subuh)}</td><td>${hToHM(t.syuruq)}</td><td>${hToHM(t.dzuhur)}</td><td>${hToHM(t.ashar)}</td><td>${hToHM(t.maghrib)}</td><td>${hToHM(t.isya)}</td></tr>`;
+    }
+  } else {
+    const mo = +document.getElementById('imMonth').value, yr = +document.getElementById('imYear').value;
+    const daysInMonth = new Date(yr,mo,0).getDate();
+    document.getElementById('imTitle').textContent = `Jadwal Sholat — ${GREG_MONTHS[mo-1]} ${yr} — ${LOC.name}`;
+    for(let d=1; d<=daysInMonth; d++){
+      const t = computeDayTimes(yr,mo,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
+      rows += `<tr><td>${d}</td><td>${dowName(yr,mo,d).slice(0,3)}</td><td>${hToHM(t.imsak)}</td><td>${hToHM(t.subuh)}</td><td>${hToHM(t.syuruq)}</td><td>${hToHM(t.dzuhur)}</td><td>${hToHM(t.ashar)}</td><td>${hToHM(t.maghrib)}</td><td>${hToHM(t.isya)}</td></tr>`;
+    }
   }
   document.getElementById('imTable').innerHTML =
-    `<tr><th>Tgl</th><th>Hari</th><th>Imsak</th><th>Shubuh</th><th>Terbit</th><th>Dzuhur</th><th>Ashar</th><th>Maghrib</th><th>Isya</th></tr>${rows}`;
+    `<tr><th>${dateHeader}</th><th>Hari</th><th>Imsak</th><th>Shubuh</th><th>Terbit</th><th>Dzuhur</th><th>Ashar</th><th>Maghrib</th><th>Isya</th></tr>${rows}`;
   document.getElementById('imResultWrap').style.display='';
 }
 document.querySelectorAll('[data-asr]').forEach(c=>{
