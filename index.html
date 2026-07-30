@@ -75,7 +75,7 @@
       radial-gradient(1.2px 1.2px at 85% 78%, #fff, transparent);
     background-repeat:no-repeat;
   }
-  .app{position:relative; z-index:1; max-width:520px; margin:0 auto; min-height:100%; display:flex; flex-direction:column;}
+  .app{position:relative; z-index:1; width:100%; max-width:520px; margin:0 auto; min-height:100%; display:flex; flex-direction:column;}
   /* ---------- header ---------- */
   header.top{
     position:sticky; top:0; z-index:20; padding:calc(var(--safe-top) + 14px) 18px 12px;
@@ -1713,7 +1713,7 @@ function computeOrbitState(date){
 
 /* ---- tekstur prosedural (canvas), tanpa perlu file gambar eksternal ---- */
 function orbitGlowTexture(){
-  const size=128;
+  const size=256;
   const c=document.createElement('canvas'); c.width=c.height=size;
   const ctx=c.getContext('2d');
   const g=ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
@@ -1724,13 +1724,13 @@ function orbitGlowTexture(){
   return new THREE.CanvasTexture(c);
 }
 function orbitSunTexture(){
-  const w=512,h=256;
+  const w=1024,h=512;
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   const ctx=c.getContext('2d');
   const base=ctx.createLinearGradient(0,0,0,h);
   base.addColorStop(0,'#fff3c0'); base.addColorStop(0.5,'#ffd35c'); base.addColorStop(1,'#ff9d2e');
   ctx.fillStyle=base; ctx.fillRect(0,0,w,h);
-  for(let i=0;i<900;i++){
+  for(let i=0;i<3200;i++){
     const x=Math.random()*w, y=Math.random()*h, r=1+Math.random()*2.4;
     const g=ctx.createRadialGradient(x,y,0,x,y,r);
     const bright=Math.random()>0.5;
@@ -1741,7 +1741,7 @@ function orbitSunTexture(){
   return new THREE.CanvasTexture(c);
 }
 function orbitEarthTextures(){
-  const w=1024,h=512;
+  const w=2048,h=1024;
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   const ctx=c.getContext('2d');
   ctx.fillStyle='#0b3d78'; ctx.fillRect(0,0,w,h);
@@ -1760,15 +1760,17 @@ function orbitEarthTextures(){
     }
     ctx.closePath(); ctx.fill();
   }
+  ctx.save(); ctx.scale(2,2); // koordinat benua dikalibrasi untuk kanvas 1024x512, skalakan 2x untuk resolusi 2048x1024
   const green='#2f8a4e', green2='#3aa05c', sand='#c8a465';
   blob(190,150,120,80,green); blob(230,190,80,50,green2);
   blob(430,130,150,70,green); blob(520,180,90,60,sand);
   blob(650,300,140,90,green); blob(700,340,70,40,green2);
   blob(830,160,110,70,green); blob(900,210,60,40,sand);
   blob(120,340,100,60,green2); blob(340,380,130,60,green);
+  ctx.restore();
   // tudung es kutub
   ctx.fillStyle='rgba(240,248,255,0.92)';
-  ctx.fillRect(0,0,w,26); ctx.fillRect(0,h-26,w,26);
+  ctx.fillRect(0,0,w,52); ctx.fillRect(0,h-52,w,52);
   const map = new THREE.CanvasTexture(c);
   map.wrapS = THREE.RepeatWrapping;
 
@@ -1787,18 +1789,18 @@ function orbitEarthTextures(){
   return {map, cloudMap};
 }
 function orbitMoonTexture(){
-  const w=512,h=256;
+  const w=1024,h=512;
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   const ctx=c.getContext('2d');
   ctx.fillStyle='#a8a8a8'; ctx.fillRect(0,0,w,h);
   for(let i=0;i<10;i++){
-    const x=Math.random()*w,y=Math.random()*h,r=25+Math.random()*45;
+    const x=Math.random()*w,y=Math.random()*h,r=50+Math.random()*90;
     const g=ctx.createRadialGradient(x,y,0,x,y,r);
     g.addColorStop(0,'rgba(120,120,120,0.55)'); g.addColorStop(1,'rgba(120,120,120,0)');
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
   }
-  for(let i=0;i<220;i++){
-    const x=Math.random()*w,y=Math.random()*h,r=1.5+Math.random()*7;
+  for(let i=0;i<480;i++){
+    const x=Math.random()*w,y=Math.random()*h,r=1.5+Math.random()*10;
     const g=ctx.createRadialGradient(x-r*0.3,y-r*0.3,0,x,y,r);
     g.addColorStop(0,'rgba(230,230,230,0.5)'); g.addColorStop(0.6,'rgba(90,90,90,0.5)'); g.addColorStop(1,'rgba(90,90,90,0)');
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
@@ -1848,12 +1850,14 @@ function buildOrbitScene(){
   /* ---- kamera 1: tampilan luas (rotasi planet berputar) ---- */
   const camera = new THREE.PerspectiveCamera(45, wW/wH, 0.1, 3000);
   camera.position.set(0, 55, 95);
-  const renderer = new THREE.WebGLRenderer({antialias:true});
+  const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
   renderer.setSize(wW,wH);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,3));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace || renderer.outputColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
   wideEl.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -1862,17 +1866,19 @@ function buildOrbitScene(){
   controls.minDistance = 12;
   controls.maxDistance = 320;
   controls.autoRotate = orbitState.autoRotate;
-  controls.autoRotateSpeed = 0.6;
+  controls.autoRotateSpeed = 0.15; // pelan & sinematik, senada dengan animasi awal rotasi planet
 
   /* ---- kamera 2: "kamera pandang" — sudut pandang dekat yang mengikuti Bumi & Bulan ---- */
   const viewCamera = new THREE.PerspectiveCamera(50, cW/cH, 0.1, 3000);
   viewCamera.position.set(0, 4, 11);
-  const viewRenderer = new THREE.WebGLRenderer({antialias:true});
+  const viewRenderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
   viewRenderer.setSize(cW,cH);
-  viewRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  viewRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,3));
   viewRenderer.shadowMap.enabled = true;
   viewRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
   viewRenderer.outputColorSpace = THREE.SRGBColorSpace || viewRenderer.outputColorSpace;
+  viewRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+  viewRenderer.toneMappingExposure = 1.15;
   closeEl.appendChild(viewRenderer.domElement);
 
   const viewControls = new THREE.OrbitControls(viewCamera, viewRenderer.domElement);
@@ -2164,10 +2170,12 @@ function buildHilalScene(){
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(52, w/h, 0.1, 500);
   camera.position.set(0,0,0.01);
-  const renderer = new THREE.WebGLRenderer({antialias:true});
+  const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
   renderer.setSize(w,h);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,3));
   renderer.outputColorSpace = THREE.SRGBColorSpace || renderer.outputColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
   wrap.appendChild(renderer.domElement);
 
   /* langit senja prosedural (gradasi biru tua -> jingga di ufuk) */
@@ -2222,6 +2230,8 @@ function buildHilalScene(){
   controls.rotateSpeed=0.35;
   controls.minPolarAngle=Math.PI*0.04; controls.maxPolarAngle=Math.PI*0.92;
   controls.target.set(0,2,-55);
+  controls.autoRotate=true;
+  controls.autoRotateSpeed=0.12; // ayunan kamera pelan & sinematik saat idle, senada dengan animasi awal rotasi planet
   controls.update();
 
   window._hilal={scene,camera,renderer,controls,sunSprite,sunLight,moonMesh,groundMesh};
@@ -2298,7 +2308,7 @@ function hilalAnimate(ts){
   if(hilalState.playing){
     if(hilalState.lastTs==null) hilalState.lastTs=ts;
     const dt=ts-hilalState.lastTs;
-    if(dt>900){
+    if(dt>2200){
       hilalState.lastTs=ts;
       hilalState.day = (hilalState.day+1)%5;
       document.getElementById('hilalDaySlider').value=hilalState.day;
