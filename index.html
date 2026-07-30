@@ -1670,12 +1670,24 @@ document.getElementById('grBtn').addEventListener('click', ()=>{
     const badgeCls = cls==='pasti' ? '' : cls==='mungkin' ? 'warn' : 'danger';
     const icon = ev.type==='solar' ? '☀️' : '🌕';
     const label = ev.type==='solar' ? 'Ijtimak (Konjungsi)' : 'Istiqbal (Oposisi)';
+    // Peristiwa gerhana bersifat global (bergantung β geosentrik), tapi HANYA teramati dari
+    // belahan Bumi yang sedang siang (gerhana Matahari) atau malam (gerhana Bulan) saat itu.
+    // Cek ketinggian Matahari/Bulan di lokasi terpilih agar tidak menyesatkan (mis. "gerhana matahari"
+    // padahal tengah malam di lokasi tsb — berarti memang tidak kelihatan dari sini).
+    const topo = ev.type==='solar' ? sunTopo(ev.jde, LOC.lat, LOC.lon) : moonTopo(ev.jde, LOC.lat, LOC.lon);
+    const visible = topo.alt > -0.833;
+    const visNote = ev.type==='solar'
+      ? (visible ? `☀️ Matahari di atas ufuk (tinggi ${topo.alt.toFixed(1)}°) — berpotensi teramati dari lokasi ini.`
+                 : `🌙 Matahari di bawah ufuk (tinggi ${topo.alt.toFixed(1)}°, malam hari di lokasi ini) — TIDAK teramati dari sini; hanya dari belahan Bumi yang siang saat itu.`)
+      : (visible ? `🌕 Bulan di atas ufuk (tinggi ${topo.alt.toFixed(1)}°) — berpotensi teramati dari lokasi ini.`
+                 : `☀️ Bulan di bawah ufuk (tinggi ${topo.alt.toFixed(1)}°, siang hari di lokasi ini) — TIDAK teramati dari sini; hanya dari belahan Bumi yang malam saat itu.`);
     return `<div class="card">
       <div class="card-head"><div class="ic ${ev.type==='lunar'?'teal':''}">${icon}</div>
         <div><div class="t">${label} — ${monthsID[cal.m-1]} ${cal.y}</div><div class="s">${Math.floor(cal.d)} ${monthsID[cal.m-1]} ${cal.y}, pukul ${hToHM(cal.h)} (UTC${LOC.tz>=0?'+':''}${LOC.tz})</div></div>
       </div>
       <span class="badge ${badgeCls}">${ev.cls.label}</span>
       <div class="kv" style="margin-top:8px;"><div class="k">Lintang ekliptika Bulan (β)</div><div class="v">${ev.beta.toFixed(3)}°</div></div>
+      <div class="note" style="margin-top:8px;">${visNote}</div>
     </div>`;
   }).join('');
 });
