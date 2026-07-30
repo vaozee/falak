@@ -246,6 +246,12 @@
   .ldock-btn.active:active{transform:translateY(-9px) scale(0.94);}
   /* subnav pills for "lainnya" */
   .subnav{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:14px; -ms-overflow-style:none; scrollbar-width:none;}
+  /* ---------- navbar gaya website (khusus desktop) ---------- */
+  .webnav{display:none; gap:6px; border-bottom:1px solid var(--glass-border); margin:6px 0 6px;}
+  .webnav-btn{position:relative; background:transparent; border:none; cursor:pointer; padding:13px 18px; font-size:14px; font-weight:700; color:var(--text-dim); font-family:inherit;}
+  .webnav-btn:hover{color:var(--text);}
+  .webnav-btn.active{color:var(--gold);}
+  .webnav-btn.active::after{content:''; position:absolute; left:16px; right:16px; bottom:-1px; height:2px; background:var(--gold-grad); border-radius:2px;}
   .subnav::-webkit-scrollbar{display:none;}
   .subnav .sitem{flex-shrink:0; display:flex; align-items:center; gap:6px; padding:9px 14px; border-radius:var(--radius-pill); background:var(--glass); border:1px solid var(--glass-border); font-size:12.5px; font-weight:700; color:var(--text-dim); cursor:pointer;}
   .subnav .sitem.active{background:var(--gold-grad); color:#2b1c05; border-color:transparent;}
@@ -274,8 +280,8 @@
   /* ================= VERSI DESKTOP (>=900px) ================= */
   @media (min-width:900px){
     body{ display:flex; justify-content:center; }
-    .app{ max-width:1180px; padding-left:104px; }
-    header.top{ padding:28px 8px 16px; backdrop-filter:none; -webkit-backdrop-filter:none; background:transparent; position:relative; }
+    .app{ max-width:1180px; }
+    header.top{ padding:28px 8px 4px; backdrop-filter:none; -webkit-backdrop-filter:none; background:transparent; position:relative; }
     header.top h1{ font-size:26px; }
     header.top .sub{ font-size:13.5px; }
     .loc-chip{ padding:10px 16px; font-size:13px; }
@@ -289,14 +295,10 @@
     .card{ padding:20px; }
     .app-footer{ text-align:left; padding:32px 8px 20px; }
 
-    /* dock -> sidebar kiri tetap (desktop) */
+    /* dock mobile disembunyikan, diganti navbar gaya website di bawah header */
     .dockspacer{ display:none; }
-    .ldock-outer{ left:0; right:auto; top:0; bottom:0; width:88px; padding-bottom:0; justify-content:flex-start; padding-top:28px; }
-    .ldock{ flex-direction:column; width:64px; height:auto; padding:10px 3px; border-radius:28px; margin:0 auto; gap:2px; }
-    .ldock-btn{ width:100%; height:56px; }
-    .ldock-btn.active{ transform:translateX(3px); }
-    .ldock-btn.active:active{ transform:translateX(3px) scale(0.94); }
-    .ldock-btn .lb{ font-size:8px; }
+    .ldock-outer{ display:none; }
+    .webnav{ display:flex; }
 
     /* subnav "lainnya" jadi pil yang lebih lega, tidak perlu scroll horizontal sempit */
     .subnav{ flex-wrap:wrap; overflow-x:visible; }
@@ -333,6 +335,14 @@
       </div>
     </div>
   </header>
+
+  <nav class="webnav" id="webnav">
+    <button class="webnav-btn active" data-target="page-home">Beranda</button>
+    <button class="webnav-btn" data-target="page-kalender">Kalender</button>
+    <button class="webnav-btn" data-target="page-awalbulan">Awal Bulan</button>
+    <button class="webnav-btn" data-target="page-imsakiyah">Imsakiyah</button>
+    <button class="webnav-btn" data-target="page-lainnya">Lainnya</button>
+  </nav>
 
   <main id="mainEl">
 
@@ -1148,25 +1158,18 @@ function saveLoc(){ try{ localStorage.setItem('falak_loc', JSON.stringify(LOC));
 let ASR_FACTOR = 1;
 let IHTIYAT = 2;
 
-/* ================= NAV (liquid glass dock) ================= */
+/* ================= NAV (liquid glass dock + navbar desktop) ================= */
 const pages = document.querySelectorAll('.page');
 const dockBtns = document.querySelectorAll('.ldock-btn');
+const webnavBtns = document.querySelectorAll('.webnav-btn');
 const bubble = document.getElementById('bubble');
 function moveBubble(btn){
   const dock = document.getElementById('dock');
   const dr = dock.getBoundingClientRect(), br = btn.getBoundingClientRect();
-  const vertical = getComputedStyle(dock).flexDirection === 'column';
-  if(vertical){
-    bubble.style.top = (br.top - dr.top) + 'px';
-    bubble.style.height = br.height + 'px';
-    bubble.style.left = '4px';
-    bubble.style.width = 'calc(100% - 8px)';
-  } else {
-    bubble.style.left = (br.left - dr.left) + 'px';
-    bubble.style.width = br.width + 'px';
-    bubble.style.top = '-8px';
-    bubble.style.height = '66px';
-  }
+  bubble.style.left = (br.left - dr.left) + 'px';
+  bubble.style.width = br.width + 'px';
+  bubble.style.top = '-8px';
+  bubble.style.height = '66px';
 }
 const HEADER_META = {
   'page-home': ['Hisab Falakiyah','Kalkulator astronomi Islam offline'],
@@ -1184,11 +1187,13 @@ function showPage(id){
     b.classList.toggle('active', isActive);
     if(isActive) moveBubble(b);
   });
+  webnavBtns.forEach(b=> b.classList.toggle('active', b.dataset.target===id));
   const mainEl = document.getElementById('mainEl');
   if(mainEl.scrollTo) mainEl.scrollTo({top:0, behavior:'instant' in document.documentElement.style?'instant':'auto'});
   refreshPage(id);
 }
 dockBtns.forEach(btn=> btn.addEventListener('click', ()=> showPage(btn.dataset.target)));
+webnavBtns.forEach(btn=> btn.addEventListener('click', ()=> showPage(btn.dataset.target)));
 document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click', ()=>{
     showPage(el.dataset.nav);
