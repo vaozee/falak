@@ -478,6 +478,114 @@
   @media (min-width:2000px){
     .app{ max-width:min(78vw, 2000px); }
   }
+
+  /* ================= LEMBAR CETAK IMSAKIYAH (dekoratif) ================= */
+  /* Ukuran dikunci ke area cetak AMAN 200mm x 285mm (bukan full 210x297mm).
+     Ini sengaja diberi jarak 5mm dari tepi kertas karena kebanyakan printer/driver PDF
+     punya margin minimum yang tidak bisa dicetak; kalau lembar dipaksa pas 297mm penuh,
+     sisa beberapa mm itu yang "meluber" jadi halaman ke-2 yang nyaris kosong.
+     Disusun flex column, agar tabel (maks. 31 baris) selalu muat SATU halaman. */
+  #imPrintSheet{ display:none; }
+  .im-sheet{
+    position:relative;
+    width:200mm;
+    height:285mm;
+    margin:0 auto;
+    background:
+      radial-gradient(ellipse 900px 500px at 8% -10%, rgba(255,255,255,0.08), transparent 60%),
+      radial-gradient(ellipse 800px 480px at 100% 0%, rgba(255,255,255,0.06), transparent 58%),
+      linear-gradient(165deg, #0d3d22 0%, #14572e 32%, #1c6b38 55%, #14572e 78%, #0d3d22 100%);
+    color:#111;
+    font-family:Georgia,'Times New Roman',serif;
+    padding:6mm 8mm;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .im-sheet .im-mosque-bg{
+    position:absolute; left:0; right:0; bottom:14mm; height:32mm;
+    opacity:0.06; pointer-events:none;
+  }
+  .im-sheet .im-corner{
+    position:absolute; width:44px; height:44px; opacity:0.5; pointer-events:none;
+  }
+  .im-sheet .im-corner.tl{ top:5px; left:5px; }
+  .im-sheet .im-corner.tr{ top:5px; right:5px; transform:scaleX(-1); }
+  .im-sheet .im-corner.bl{ bottom:5px; left:5px; transform:scaleY(-1); }
+  .im-sheet .im-corner.br{ bottom:5px; right:5px; transform:scale(-1,-1); }
+  .im-sheet .im-frame{
+    position:absolute; inset:7px;
+    border:2px solid rgba(180,140,60,0.55);
+    border-radius:4px;
+    pointer-events:none;
+  }
+  .im-sheet .im-frame::before{
+    content:''; position:absolute; inset:5px;
+    border:1px solid rgba(180,140,60,0.32);
+    border-radius:2px;
+  }
+  .im-head{ position:relative; text-align:center; flex:0 0 auto; }
+  .im-head h1.im-title{
+    margin:0; font-size:23px; font-weight:900; letter-spacing:1.5px;
+    color:#111; line-height:1.05;
+  }
+  .im-head .im-sub{
+    margin:5px auto 2px; display:inline-block; padding:3px 18px;
+    font-family:Arial,Helvetica,sans-serif; font-weight:700; letter-spacing:1.2px;
+    font-size:11.5px; color:#12351f; background:linear-gradient(180deg,#f8e6a3,#e6c257);
+    border:1px solid rgba(180,140,60,0.5);
+    border-radius:3px; box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }
+  .im-head .im-wilayah{
+    margin-top:4px; font-family:Arial,Helvetica,sans-serif; font-weight:700;
+    letter-spacing:0.8px; font-size:10.5px; color:#111; text-transform:uppercase;
+  }
+  .im-meta{
+    position:relative; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;
+    font-family:Arial,Helvetica,sans-serif; font-size:9.5px; color:#111;
+    margin:3mm 1mm; opacity:0.85; flex:0 0 auto;
+  }
+  .im-table-wrap{ position:relative; margin:0 1mm; flex:1 1 auto; min-height:0; }
+  table.im-print-table{
+    width:100%; height:100%; table-layout:fixed; border-collapse:separate; border-spacing:0;
+    font-family:Arial,Helvetica,sans-serif; font-size:10.3px;
+    border:1px solid rgba(180,140,60,0.55); border-radius:6px; overflow:hidden;
+  }
+  table.im-print-table th, table.im-print-table td{ white-space:nowrap; overflow:hidden; text-overflow:clip; }
+  table.im-print-table thead th{
+    background:linear-gradient(180deg,#f8e6a3,#dfb94e);
+    color:#12351f; padding:4px 2px; text-align:center; font-size:9.7px; font-weight:700;
+    border-right:1px solid rgba(180,140,60,0.35);
+  }
+  table.im-print-table tbody td{
+    text-align:center; padding:2.6px 2px; color:#111;
+    border-top:1px solid rgba(180,140,60,0.3);
+    border-right:1px solid rgba(180,140,60,0.22);
+  }
+  table.im-print-table tbody td:nth-child(2){ text-align:left; padding-left:6px; }
+  table.im-print-table tbody tr:nth-child(even){ background:rgba(180,140,60,0.055); }
+  table.im-print-table tbody td.im-day{ color:#111; font-weight:700; }
+  .im-foot{
+    position:relative; margin:2.4mm 1mm 0; font-family:Arial,Helvetica,sans-serif;
+    font-size:8.3px; color:#111; line-height:1.42; flex:0 0 auto; opacity:0.85;
+  }
+  .im-foot .im-note-title{ font-weight:700; color:#111; margin-bottom:1.5px; font-size:8.7px; display:block; opacity:1; }
+  .im-foot ol{ margin:0; padding-left:14px; }
+  .im-foot .im-src{
+    margin-top:2mm; padding-top:2mm; border-top:1px solid rgba(180,140,60,0.4);
+    display:flex; justify-content:space-between; align-items:center; font-size:7.8px; opacity:0.9;
+  }
+
+  @media print{
+    html, body{ height:auto !important; margin:0 !important; padding:0 !important; overflow:visible !important; }
+    /* display:none (bukan sekadar visibility:hidden) supaya elemen lain benar-benar
+       lepas dari alur layout dan tidak menyisakan ruang kosong yang memicu halaman ke-2 */
+    body > *:not(#imPrintSheet){ display:none !important; }
+    #imPrintSheet{ display:block !important; position:static; width:100%; margin:0; padding:0; }
+    .im-sheet{ box-shadow:none; page-break-after:avoid; page-break-inside:avoid; break-after:avoid; margin:0 auto; }
+    @page{ size:A4 portrait; margin:5mm; }
+  }
 </style>
 </head>
 <body>
@@ -669,8 +777,12 @@
           <table class="mini" id="imTable" style="min-width:520px;"></table>
         </div>
         <div class="note">Kriteria: Imsak = Shubuh −20°, Shubuh −20°, Terbit/Maghrib memperhitungkan ketinggian tempat, Isya −18°, ditambah ihtiyat (kehati-hatian) 2 menit — mengikuti standar hisab yang umum dipakai di Indonesia (Kemenag).</div>
+        <button class="btn" id="imPdfBtn" style="margin-top:10px;">🖨️ Ekspor Jadwal ke PDF</button>
       </div>
     </section>
+
+    <!-- ============ LEMBAR CETAK IMSAKIYAH (dekoratif, hanya tampil saat print) ============ -->
+    
 
     <!-- ============ PAGE: LAINNYA ============ -->
     <section class="page" id="page-lainnya">
@@ -1772,6 +1884,73 @@ document.querySelectorAll('[data-asr]').forEach(c=>{
 });
 document.getElementById('imBtn').addEventListener('click', renderImsakiyahTable);
 
+/* ================= EKSPOR PDF IMSAKIYAH (lembar dekoratif) ================= */
+function buildImsakiyahDays(){
+  // Mengumpulkan data hari yang sama persis dengan yang dipakai renderImsakiyahTable(),
+  // supaya lembar cetak selalu sinkron dengan tabel yang sedang ditampilkan di layar.
+  const days = [];
+  let judulBulan = '';
+  if(imMode==='h'){
+    const hm = +document.getElementById('imMonthH').value, hy = +document.getElementById('imYearH').value;
+    const start = getMonthStart(hy,hm, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+    const len = hijriMonthLength(hy,hm, LOC.lat,LOC.lon,LOC.tz,LOC.elev,'mabims2021');
+    judulBulan = `${HIJRI_MONTHS[hm-1]} ${hy} H`;
+    for(let i=0;i<len;i++){
+      const g = addDays(start.y,start.m,start.d,i);
+      const t = computeDayTimes(g.y,g.m,g.d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
+      days.push({label:String(i+1), tgl:`${dowName(g.y,g.m,g.d)}, ${g.d} ${GREG_MONTHS[g.m-1]} ${g.y}`, t});
+    }
+  } else {
+    const mo = +document.getElementById('imMonth').value, yr = +document.getElementById('imYear').value;
+    const daysInMonth = new Date(yr,mo,0).getDate();
+    judulBulan = `${GREG_MONTHS[mo-1]} ${yr}`;
+    for(let d=1; d<=daysInMonth; d++){
+      const t = computeDayTimes(yr,mo,d, LOC.lat,LOC.lon,LOC.tz,LOC.elev, ASR_FACTOR, IHTIYAT);
+      days.push({label:String(d), tgl:`${dowName(yr,mo,d)}, ${d} ${GREG_MONTHS[mo-1]} ${yr}`, t});
+    }
+  }
+  return {days, judulBulan};
+}
+
+function renderImsakiyahPrintSheet(){
+  const {days, judulBulan} = buildImsakiyahDays();
+
+  document.getElementById('imPrintSub').textContent = judulBulan.toUpperCase();
+  document.getElementById('imPrintWilayah').textContent = `Untuk Wilayah ${LOC.name}`;
+  document.getElementById('imPrintKoord').textContent =
+    `Lintang : ${dmsStr(LOC.lat,'LU','LS')}   Bujur : ${dmsStr(LOC.lon,'BT','BB')}`;
+  document.getElementById('imPrintTz').textContent = `Zona Waktu : UTC${LOC.tz>=0?'+':''}${LOC.tz}`;
+  document.getElementById('imPrintMarkaz').textContent =
+    `Markaz perhitungan ${LOC.name} — Lintang : ${dmsStr(LOC.lat,'LU','LS')}, Bujur : ${dmsStr(LOC.lon,'BT','BB')}`;
+
+  const rows = days.map(d => `<tr>
+      <td class="im-day">${d.label}</td>
+      <td>${d.tgl}</td>
+      <td>${hToHM(d.t.imsak)}</td>
+      <td>${hToHM(d.t.subuh)}</td>
+      <td>${hToHM(d.t.syuruq)}</td>
+      <td>${hToHM(d.t.dzuhur)}</td>
+      <td>${hToHM(d.t.ashar)}</td>
+      <td>${hToHM(d.t.maghrib)}</td>
+      <td>${hToHM(d.t.isya)}</td>
+    </tr>`).join('');
+
+  document.getElementById('imPrintTable').innerHTML =
+    `<colgroup>
+       <col style="width:6%"><col style="width:23%">
+       <col style="width:10.14%"><col style="width:10.14%"><col style="width:10.14%">
+       <col style="width:10.14%"><col style="width:10.14%"><col style="width:10.14%"><col style="width:10.14%">
+     </colgroup>
+     <thead><tr><th>${imMode==='h'?'Ke-':'No'}</th><th>Tanggal</th><th>Imsak</th><th>Shubuh</th><th>Syuruq</th><th>Dzuhur</th><th>Ashar</th><th>Maghrib</th><th>Isya</th></tr></thead>
+     <tbody>${rows}</tbody>`;
+}
+
+document.getElementById('imPdfBtn').addEventListener('click', ()=>{
+  renderImsakiyahPrintSheet();
+  // beri jeda singkat agar DOM lembar cetak selesai dirender sebelum dialog print dibuka
+  setTimeout(()=>{ window.print(); }, 60);
+});
+
 /* ================= KIBLAT PAGE ================= */
 function renderKiblat(){
   const az = qiblaAzimuth(LOC.lat,LOC.lon);
@@ -2568,5 +2747,85 @@ updateLocDisplays();
 renderHome();
 setTimeout(()=>{ const b=document.querySelector('.ldock-btn.active'); if(b) moveBubble(b); }, 50);
 </script>
+<div id="imPrintSheet">
+      <div class="im-sheet">
+        <div class="im-frame"></div>
+        <svg class="im-corner tl" viewBox="0 0 100 100" fill="none" stroke="#f4e3b2" stroke-width="2">
+          <path d="M5 40 Q5 5 40 5" />
+          <circle cx="40" cy="5" r="3" fill="#f4e3b2"/>
+          <circle cx="5" cy="40" r="3" fill="#f4e3b2"/>
+          <path d="M15 40 Q15 15 40 15" stroke-width="1"/>
+        </svg>
+        <svg class="im-corner tr" viewBox="0 0 100 100" fill="none" stroke="#f4e3b2" stroke-width="2">
+          <path d="M5 40 Q5 5 40 5" />
+          <circle cx="40" cy="5" r="3" fill="#f4e3b2"/>
+          <circle cx="5" cy="40" r="3" fill="#f4e3b2"/>
+          <path d="M15 40 Q15 15 40 15" stroke-width="1"/>
+        </svg>
+        <svg class="im-corner bl" viewBox="0 0 100 100" fill="none" stroke="#f4e3b2" stroke-width="2">
+          <path d="M5 40 Q5 5 40 5" />
+          <circle cx="40" cy="5" r="3" fill="#f4e3b2"/>
+          <circle cx="5" cy="40" r="3" fill="#f4e3b2"/>
+          <path d="M15 40 Q15 15 40 15" stroke-width="1"/>
+        </svg>
+        <svg class="im-corner br" viewBox="0 0 100 100" fill="none" stroke="#f4e3b2" stroke-width="2">
+          <path d="M5 40 Q5 5 40 5" />
+          <circle cx="40" cy="5" r="3" fill="#f4e3b2"/>
+          <circle cx="5" cy="40" r="3" fill="#f4e3b2"/>
+          <path d="M15 40 Q15 15 40 15" stroke-width="1"/>
+        </svg>
+
+        <svg class="im-mosque-bg" viewBox="0 0 1200 260" preserveAspectRatio="xMidYMax meet" fill="#f4e3b2">
+          <rect x="80" y="150" width="120" height="110"/>
+          <polygon points="140,90 90,150 190,150"/>
+          <rect x="120" y="60" width="10" height="40"/>
+          <rect x="150" y="60" width="10" height="40"/>
+          <rect x="900" y="150" width="130" height="110"/>
+          <polygon points="965,85 900,150 1030,150"/>
+          <rect x="935" y="55" width="10" height="45"/>
+          <rect x="965" y="45" width="14" height="55"/>
+          <rect x="1000" y="55" width="10" height="45"/>
+          <rect x="450" y="110" width="300" height="150"/>
+          <circle cx="600" cy="95" r="70"/>
+          <rect x="580" y="20" width="12" height="45"/>
+          <circle cx="586" cy="18" r="7"/>
+          <rect x="380" y="80" width="16" height="180"/>
+          <circle cx="388" cy="70" r="12"/>
+          <rect x="804" y="80" width="16" height="180"/>
+          <circle cx="812" cy="70" r="12"/>
+          <rect x="330" y="130" width="60" height="130"/>
+          <rect x="810" y="130" width="60" height="130"/>
+        </svg>
+
+        <div class="im-head">
+          <h1 class="im-title">JADWAL<br>IMSAKIYAH</h1>
+          <div class="im-sub" id="imPrintSub">BULAN RAMADAN 1447 H / 2026 M</div>
+          <div class="im-wilayah" id="imPrintWilayah">Untuk Wilayah —</div>
+        </div>
+
+        <div class="im-meta">
+          <span id="imPrintKoord">Lintang / Bujur —</span>
+          <span id="imPrintTz">Zona Waktu —</span>
+        </div>
+
+        <div class="im-table-wrap">
+          <table class="im-print-table" id="imPrintTable"></table>
+        </div>
+
+        <div class="im-foot">
+          <span class="im-note-title">Catatan:</span>
+          <ol>
+            <li>Dihisab oleh Ach. Fauzi (Aktual menunggu keputusan Depag setempat)</li>
+            <li>Jadwal ini menggunakan Ihtiyath 1-2 menit dengan ketinggian tempat sesuai lokasi terpilih</li>
+            <li>Untuk awal bulan Ramadhan, Syawal dan Dzulhijjah menunggu keputusan Pemerintah RI</li>
+            <li id="imPrintMarkaz">Markaz perhitungan — Lintang : —, Bujur : —</li>
+          </ol>
+          <div class="im-src">
+            <span>Penetapan 1 Ramadhan &amp; 1 Syawal menunggu Keputusan Menteri Agama RI</span>
+            <span>Sumber: Aplikasi Hisab Falakiyah</span>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
 </html>
